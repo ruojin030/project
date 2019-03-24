@@ -1,0 +1,19 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-session": "^1.3.3",
+    "express": "^4.16.4",
+    "mongod": "^2.0.0",
+    "mongodb": "^3.2.2",
+    "request-ip": "^2.1.3",
+    "uniqid": "^5.0.3"
+  }
+}

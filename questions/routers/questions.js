@@ -5,19 +5,19 @@ var router = express.Router();
 var jsonParser = bodyParser.json()
 
 router.post('/add',jsonParser,function(req,res){
-    //var user = req.body.current_user
-    var user = "FAKEUSER!"
+    var user = req.body.current_user
+    //var user = "FAKEUSER!"
     var db = req.app.locals.db
     const qCollection = db.collection('questions')
     console.log(req.body)
     if(user == null){
         return res.json({'status':'error','error':'user not login'})
     }else{
-        /*db.collection('users').find({'username':user}).toArray(function(err,result){
+        db.collection('users').find({'username':user}).toArray(function(err,result){
             if(result.length!= 1){
                 return res.json({'status':'error','error':'user not match'})
-            }else{*/
-                var userReputation = 0 //result[0].reputation
+            }else{
+                var userReputation = result[0].reputation
                 if(req.body.title == null||req.body.body == null||req.body.tags == null){
                     return res.json({'status':'error','error':'wrong request type'})
                 }  
@@ -43,8 +43,8 @@ router.post('/add',jsonParser,function(req,res){
                         res.json({'status':"OK",'id':data.id})
                     }
                 })
-           // }
-        //})    
+            }
+        })    
     }
 });
 

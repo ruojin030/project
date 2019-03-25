@@ -11,6 +11,7 @@
   "dependencies": {
     "express": "^4.16.4",
     "mongod": "^2.0.0",
-    "mongodb": "^3.2.2"
+    "mongodb": "^3.2.2",
+    "sleep": "^6.0.0"
   }
 }

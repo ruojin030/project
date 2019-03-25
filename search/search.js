@@ -5,7 +5,7 @@ const mongo_address = 'mongodb://130.245.171.133:27017';
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json()
 
-const port = 80
+const port = 3001
 
 app.get('/',function(req,res){
     res.send("hello!")

@@ -31,7 +31,7 @@ router.post('/add',jsonParser,function(req,res){
                 data['answers'] = []
                 data['timestamp'] = Date.now()/1000 |0
                 data['media'] = []
-                data['tags'] = req.body.tages
+                data['tags'] = req.body.tags
                 data['accepted_answer_id'] = null
                 //console.log(data)  
                 qCollection.insertOne(data,function(err,result){

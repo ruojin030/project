@@ -122,7 +122,7 @@ router.post('/:id/answers/add',jsonParser,function(req,res){
                     if (err) throw err;
                     console.log("answer "+answer.id+" updated");
                 });
-                res.json({'status':'ok','id':answer.id})
+                res.json({'status':'OK','id':answer.id})
             }
     })
 }

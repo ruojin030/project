@@ -17,7 +17,7 @@ app.post('/search',jsonParser,function(req,res){
     var limit = req.body.limit
     var accepted = req.body.accepted
     
-    //console.log("timestamps " + timestamp +"\nlimit "+ limit +"\naccepted "+ accepted)
+    console.log("timestamps " + timestamp +"\nlimit "+ limit +"\naccepted "+ accepted)
     if(timestamp == null){
         timestamp =  Date.now()/1000 |0
     }
@@ -69,6 +69,7 @@ app.post('/search',jsonParser,function(req,res){
                 for(var i in question.answers){
                     answers.push(question.answers[i])
                 }
+                
                 question['view_count'] = views.length
                 delete question.views
                 delete question._id

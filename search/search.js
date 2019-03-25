@@ -12,8 +12,7 @@ app.get('/',function(req,res){
 })
 
 app.post('/search',jsonParser,function(req,res){
-    
-    //console.log("nobody nobody but u <3")
+    console.log("nobody nobody but u <3")
     var timestamp = req.body.timestamp
     var limit = req.body.limit
     var accepted = req.body.accepted

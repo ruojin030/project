@@ -4,7 +4,7 @@ const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://130.245.171.133:27017';
 const cookieSession = require('cookie-session');
 
-const port = 80
+const port = 3000
 
 app.use(cookieSession({
     name: 'session',

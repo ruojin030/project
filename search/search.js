@@ -12,7 +12,7 @@ app.get('/',function(req,res){
 })
 
 app.post('/search',jsonParser,function(req,res){
-    console.log("nobody nobody but u <3")
+    //console.log("nobody nobody but u <3")
     var timestamp = req.body.timestamp
     var limit = req.body.limit
     var accepted = req.body.accepted
@@ -33,8 +33,9 @@ app.post('/search',jsonParser,function(req,res){
     var db = req.app.locals.db
     if(accepted){
         db.collection('questions').find({ 'timestamp': { $lt: timestamp },'accepted_answer_id':{$ne:null} })
-        .limit(limit).sort({'timestamp':-1}).toArray(function(err,result){
+        .limit(limit).sort({'timestamp':1}).toArray(function(err,result){
             if (err) throw err; 
+            console.log("THE NUM OF RESULT IS "+result.length)
             var questions = [] 
             for(var i in result){
                 var question = result[i]
@@ -56,8 +57,9 @@ app.post('/search',jsonParser,function(req,res){
             res.json({'status':'OK', 'questions':questions})
         })
     }else{
-        db.collection('questions').find({ 'timestamp': { $lt: timestamp }}).limit(limit).sort({'timestamp':-1}).toArray(function(err,result){
+        db.collection('questions').find({ 'timestamp': { $lte: timestamp }}).limit(limit).sort({'timestamp':1}).toArray(function(err,result){
             if (err) throw err;  
+            console.log("THE NUM OF RESULT IS "+result.length)
             var questions = [] 
             for(var i in result){
                 var question = result[i]

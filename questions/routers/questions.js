@@ -29,7 +29,7 @@ router.post('/add',jsonParser,function(req,res){
                 data['score'] = 0
                 data['views'] = []
                 data['answers'] = []
-                data['timestamp'] = Date.now()/1000 |0
+                data['timestamp'] = Date.now()/1000
                 data['media'] = null
                 data['tags'] = req.body.tags
                 data['accepted_answer_id'] = null
@@ -111,7 +111,7 @@ router.post('/:id/answers/add',jsonParser,function(req,res){
                 answer['score'] = 0
                 answer['user'] = user
                 answer['is_accepted'] = false
-                answer['timestamp'] = Date.now()/1000 |0
+                answer['timestamp'] = Date.now()/1000
                 //console.log(answer)
                 var answers = []
                 for(var i in question.answers){

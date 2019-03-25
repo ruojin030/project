@@ -94,3 +94,4 @@ MongoClient.connect(mongo_address, (err, client) => {
   })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+module.exports = app;

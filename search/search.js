@@ -18,6 +18,7 @@ app.post('/search',jsonParser,function(req,res){
     var timestamp = req.body.timestamp
     var limit = req.body.limit
     var accepted = req.body.accepted
+    var q = req.body.q
     
     console.log("timestamps " + timestamp +"\nlimit "+ limit +"\naccepted "+ accepted)
     if(timestamp == null){
@@ -33,57 +34,38 @@ app.post('/search',jsonParser,function(req,res){
         accepted = false
     }
     var db = req.app.locals.db
+    var query = { 'timestamp': { $lt: timestamp } }
     if(accepted){
-        db.collection('questions').find({ 'timestamp': { $lt: timestamp },'accepted_answer_id':{$ne:null} })
-        .limit(limit).sort({'timestamp':1}).toArray(function(err,result){
-            if (err) throw err; 
-            console.log("THE NUM OF RESULT IS "+result.length)
-            var questions = [] 
-            for(var i in result){
-                var question = result[i]
-                var views = []
-                for(var i in question.views){
-                    views.push(question.views[i])
-                }
-                var answers = []
-                for(var i in question.answers){
-                    answers.push(question.answers[i])
-                }
-                question['view_count'] = views.length
-                delete question.views
-                delete question._id
-                delete question.answers
-                question['answer_count'] = answers.length
-                questions.push(question)
-            }
-            res.json({'status':'OK', 'questions':questions})
-        })
-    }else{
-        db.collection('questions').find({ 'timestamp': { $lte: timestamp }}).limit(limit).sort({'timestamp':1}).toArray(function(err,result){
-            if (err) throw err;  
-            console.log("THE NUM OF RESULT IS "+result.length)
-            var questions = [] 
-            for(var i in result){
-                var question = result[i]
-                var views = []
-                for(var i in question.views){
-                    views.push(question.views[i])
-                }
-                var answers = []
-                for(var i in question.answers){
-                    answers.push(question.answers[i])
-                }
-                
-                question['view_count'] = views.length
-                delete question.views
-                delete question._id
-                delete question.answers
-                question['answer_count'] = answers.length
-                questions.push(question)
-            }
-            res.json({'status':'OK', 'questions':questions})  
-        })
+        query.accepted_answer_id = {$ne:null}
     }
+    if(q!= null){
+        query.$text = {$search:"\""+q+"\""}//{$search:q}//
+    }
+
+    db.collection('questions').find(query).limit(limit).sort({'timestamp':1}).toArray(function(err,result){
+        if (err) throw err; 
+        console.log("THE NUM OF RESULT IS "+result.length)
+        var questions = [] 
+        for(var i in result){
+            var question = result[i]
+            var views = []
+            for(var i in question.views){
+                views.push(question.views[i])
+            }
+            var answers = []
+            for(var i in question.answers){
+                answers.push(question.answers[i])
+            }
+            question['view_count'] = views.length
+            delete question.views
+            delete question._id
+            delete question.answers
+            question['answer_count'] = answers.length
+            questions.push(question)
+        }
+        res.json({'status':'OK', 'questions':questions})
+    })
+    
 })
 
 MongoClient.connect(mongo_address, (err, client) => {

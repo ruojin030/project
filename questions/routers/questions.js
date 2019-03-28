@@ -25,7 +25,7 @@ router.post('/add',jsonParser,function(req,res){
                 data['id'] = uniqid.time();
                 data['user'] = {'username':user,'reputation':userReputation}
                 data['title'] = req.body.title
-                data['body'] = req.body.body
+                data['body'] = req.body.body 
                 data['score'] = 0
                 data['views'] = []
                 data['answers'] = []
@@ -94,7 +94,7 @@ router.get('/:id',jsonParser,function(req,res){
 router.post('/:id/answers/add',jsonParser,function(req,res){
     var qID = req.params.id
     var user = req.body.current_user
-    //hvar user = "FAKEUSER"
+    //var user = "FAKEUSER"
     var db = req.app.locals.db
     const qCollection = db.collection('questions')
     if (user == null){
@@ -146,10 +146,31 @@ router.get('/:id/answers',function(req,res){
             res.json({'status':'OK', 'answers':answers})
         }
     })
-    
 })
-
-
+router.delete('/:id',function(req,res){
+    //201 not login 202 incorrect id 203 user and session user not same 204 delete fail
+    const qID = req.params.id
+    var db = req.app.locals.db
+    var user = req.body.current_user
+    if(user == null){
+        return res.sendStatus(201)
+    }
+    db.collection('questions').find({'id':qID}).toArray(function(err,result){
+        if(result.length!= 1){
+            return res.sendStatus(202)
+        }else{
+            var question = result[0]
+            if(question.user.username != user){
+                return res.sendStatus(203)
+            }else{
+                db.collection('questions').deleteOne({'id':qID}, function(err,obj){
+                    if(err) return res.sendStatus(204)
+                    console.log(qID+" question delete")
+                })
+            }    
+        }
+    })
+})
 
 
 

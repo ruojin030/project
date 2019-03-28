@@ -28,6 +28,7 @@ MongoClient.connect(mongo_address, (err, client) => {
     db = client.db('pro');
     //console.log(db);
     app.locals.db = db;
+    db.collection("questions").createIndex({'title':"text",'body':"text"})
   })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

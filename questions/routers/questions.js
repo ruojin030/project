@@ -155,18 +155,19 @@ router.delete('/:id',jsonParser,function(req,res){
     //201 not login 202 incorrect id 203 user and session user not same 204 delete fail
     var db = req.app.locals.db
     if(req.body.current_user == null){
-        return res.sendStatus(201)
+        return res.sendStatus(301)
     }
+    console.log(req.body.current_user)
     db.collection('questions').find({'id':req.params.id}).toArray(function(err,result){
         if(result.length!= 1){
-            return res.sendStatus(202)
+            return res.sendStatus(302)
         }else{
             var question = result[0]
             if(question.user.username != req.body.current_user){
-                return res.sendStatus(203)
+                return res.sendStatus(303)
             }else{
                 db.collection('questions').deleteOne({'id':req.params.id}, function(err,obj){
-                    if(err) return res.sendStatus(204)
+                    if(err) return res.sendStatus(304)
                     console.log(req.params.id+" question delete")
                 })
             }    

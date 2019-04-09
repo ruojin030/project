@@ -38,7 +38,7 @@ app.post('/search',jsonParser,function(req,res){
     if(req.body.accepted){
         query.accepted_answer_id = {$ne:null}
     }
-    if(req.body.q!= null && req.body.q != " "){
+    if(req.body.q!= null && req.body.q != ""){
         query.$text = {$search:req.body.q}//{$search:q}//
         console.log(query)
     }

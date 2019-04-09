@@ -4,6 +4,10 @@ var uniqid = require("uniqid");
 var router = express.Router();
 var jsonParser = bodyParser.json()
 
+
+router.get('/add',function(req,res){
+    res.sendFile('/../questions.html');
+});
 router.post('/add',jsonParser,function(req,res){
     var user = req.body.current_user
     //var user = "FAKEUSER!"

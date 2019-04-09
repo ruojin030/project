@@ -1,0 +1,34 @@
+<html>
+    <title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script>$("#form").submit(function(e){
+            var tags = '#tags'
+            var tag =tags.split(',')
+            var  question_data = {'title':'#title', 'body':'#body', 'tags':tag}
+            e.preventDefault();
+            $.ajax({
+                type: adduser_form.attr('method'),
+                url: adduser_form.attr('action'),
+                contentType:"application/json; charset=utf-8",
+                data: JSON.stringify(adduser_data),
+                dataType:"json",
+                success: function (data){
+                    console.log(data);
+                    if (data.status=='OK'){
+                        var id = data.id 
+                        window.location.href='/question/'+id
+                    }
+                }
+            })
+        })
+        </script>
+    </title>
+    <body>
+        <form id = form action = "/questions/add" method = "POST">
+            Titlė: <input id = "title" type = "text" name = "title"style = "width:200px"><br><br>
+            Body: <input id = "body" type = "text" name="body" style = "height: 400px; width:200px"><br><br>
+            Tågs: <input id = "tags" type = "text" name = "tags" style = "width:200px"><br><br>
+            <input value = "submit" type = "submit" >
+        </form>
+    </body>
+</html>

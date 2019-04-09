@@ -20,29 +20,29 @@ app.post('/search',jsonParser,function(req,res){
     var accepted = req.body.accepted
     var q = req.body.q
     
-    console.log("timestamps " + timestamp +"\nlimit "+ limit +"\naccepted "+ accepted)
-    if(timestamp == null){
-        timestamp =  Date.now()/1000 |0
+    console.log("timestamps " + req.body.timestamp +"\nlimit "+ req.body.limit +"\naccepted "+ req.body.accepted)
+    if(req.body.timestamp == null){
+        req.body.timestamp =  Date.now()/1000 |0
     }
-    if(limit == null){
-        limit =25
+    if(req.body.limit == null){
+        req.body.limit =25
     }
-    if(limit >100){
-        limit = 100
+    if(req.body.limit >100){
+        req.body.limit = 100
     }
-    if(typeof accepted != "boolean"){
-        accepted = false
+    if(typeof req.body.accepted != "boolean"){
+        req.body.accepted = false
     }
     var db = req.app.locals.db
-    var query = { 'timestamp': { $lt: timestamp } }
-    if(accepted){
+    var query = { 'timestamp': { $lt: req.body.timestamp } }
+    if(req.body.accepted){
         query.accepted_answer_id = {$ne:null}
     }
-    if(q!= null){
-        query.$text = {$search:"\""+q+"\""}//{$search:q}//
+    if(req.body.q!= null && req.body.q != ""){
+        query.$text = {$search:"\""+req.body.q+"\""}//{$search:q}//
     }
 
-    db.collection('questions').find(query).limit(limit).sort({'timestamp':1}).toArray(function(err,result){
+    db.collection('questions').find(query).limit(req.body.limit).sort({'timestamp':1}).toArray(function(err,result){
         if (err) throw err; 
         console.log("THE NUM OF RESULT IS "+result.length)
         var questions = [] 

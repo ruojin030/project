@@ -174,7 +174,8 @@ router.delete('/:id',jsonParser,function(req,res){
                     if(err) {res.status(403)
                     return res.json({'status':'error'})}
                     console.log(req.params.id+" question delete")
-                    res.json({'status':'ok'})
+
+                    res.json({'status':'OK'})
                 })
             }    
         }

@@ -151,10 +151,10 @@ router.get('/:id/answers',function(req,res){
         }
     })
 })
-router.delete('/:id',function(req,res){
+router.delete('/:id',jsonParser,function(req,res){
     //201 not login 202 incorrect id 203 user and session user not same 204 delete fail
     var db = req.app.locals.db
-    if(req.body == null){
+    if(req.body.current_user == null){
         return res.sendStatus(201)
     }
     db.collection('questions').find({'id':req.params.id}).toArray(function(err,result){

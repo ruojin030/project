@@ -14,10 +14,10 @@ router.post('/add',jsonParser,function(req,res){
     var db = req.app.locals.db
     const qCollection = db.collection('questions')
     console.log(req.body)
-    if(user == null){
+    if(req.body.current_user == null){
         return res.json({'status':'error','error':'user not login'})
     }else{
-        db.collection('users').find({'username':user}).toArray(function(err,result){
+        db.collection('users').find({'username':req.body.current_user}).toArray(function(err,result){
             if(result.length!= 1){
                 return res.json({'status':'error','error':'user not match'})
             }else{
@@ -27,7 +27,7 @@ router.post('/add',jsonParser,function(req,res){
                 }  
                 var data = {}
                 data['id'] = uniqid.time();
-                data['user'] = {'username':user,'reputation':userReputation}
+                data['user'] = {'username':req.body.current_user,'reputation':userReputation}
                 data['title'] = req.body.title
                 data['body'] = req.body.body 
                 data['score'] = 0
@@ -55,7 +55,7 @@ router.post('/add',jsonParser,function(req,res){
 router.get('/:id',jsonParser,function(req,res){
     var qID = req.params.id
     var db = req.app.locals.db
-    db.collection('questions').find({'id':qID}).toArray(function(err,result){
+    db.collection('questions').find({'id':req.params.id}).toArray(function(err,result){
         if(result.length != 1){
             return res.json({'status':'error','error':'question not found'})
         }
@@ -78,7 +78,7 @@ router.get('/:id',jsonParser,function(req,res){
             if(!views.includes(user)){
                 console.log("not included, views "+views)
                 views.push(user)
-                db.collection('questions').updateOne({'id':qID }, { $set: {'views': views}}, function(err, res) {
+                db.collection('questions').updateOne({'id':req.params.id }, { $set: {'views': views}}, function(err, res) {
                     if (err) throw err;
                     console.log("1 views updated");
             });
@@ -101,10 +101,10 @@ router.post('/:id/answers/add',jsonParser,function(req,res){
     //var user = "FAKEUSER"
     var db = req.app.locals.db
     const qCollection = db.collection('questions')
-    if (user == null){
+    if (req.body.current_user == null){
         return res.json({'status':'error','error':'you have to login to answer'} )
     }else{
-        qCollection.find({'id':qID}).toArray(function(err,result){
+        qCollection.find({'id':req.params.id}).toArray(function(err,result){
             if(result.length!= 1){
                 return res.json({'status':'error','error':'question not found'} )
             }
@@ -113,7 +113,7 @@ router.post('/:id/answers/add',jsonParser,function(req,res){
                 var answer = req.body
                 answer['id'] = uniqid.time("A")
                 answer['score'] = 0
-                answer['user'] = user
+                answer['user'] = req.body.current_user
                 answer['is_accepted'] = false
                 answer['timestamp'] = Date.now()/1000
                 //console.log(answer)
@@ -122,7 +122,7 @@ router.post('/:id/answers/add',jsonParser,function(req,res){
                     answers.push(question.answers[i])
                 }
                 answers.push(answer)
-                qCollection.updateOne({'id':qID}, {$set:{'answers':answers}},function(err, res) {
+                qCollection.updateOne({'id':req.params.id}, {$set:{'answers':answers}},function(err, res) {
                     if (err) throw err;
                     console.log("answer "+answer.id+" updated");
                 });
@@ -137,7 +137,7 @@ router.get('/:id/answers',function(req,res){
     var db = req.app.locals.db
     const qCollection = db.collection('questions')
     var question = {}
-    qCollection.find({'id':qID}).toArray(function(err,result){
+    qCollection.find({'id':req.params.id}).toArray(function(err,result){
         if(result.length!= 1){
             return res.json({'status':'error','error':'question not found'} )
         }
@@ -156,20 +156,20 @@ router.delete('/:id',function(req,res){
     const qID = req.params.id
     var db = req.app.locals.db
     var user = req.body.current_user
-    if(user == null){
+    if(req.body.current_user == null){
         return res.sendStatus(201)
     }
-    db.collection('questions').find({'id':qID}).toArray(function(err,result){
+    db.collection('questions').find({'id':req.params.id}).toArray(function(err,result){
         if(result.length!= 1){
             return res.sendStatus(202)
         }else{
             var question = result[0]
-            if(question.user.username != user){
+            if(question.user.username != req.body.current_user){
                 return res.sendStatus(203)
             }else{
-                db.collection('questions').deleteOne({'id':qID}, function(err,obj){
+                db.collection('questions').deleteOne({'id':req.params.id}, function(err,obj){
                     if(err) return res.sendStatus(204)
-                    console.log(qID+" question delete")
+                    console.log(req.params.id+" question delete")
                 })
             }    
         }

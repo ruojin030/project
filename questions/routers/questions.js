@@ -57,9 +57,8 @@ router.get('/:id', jsonParser, function (req, res) {
         }
         else {
             var question = result[0]
-            var user = req.body.current_user
-            if (user == null) { //count by IP
-                user = req.connection.remoteAddress
+            if (req.body.current_user == null) { //count by IP
+                req.body.current_user = req.connection.remoteAddress
             }
             var views = []
             //console.log(question.views)
@@ -70,9 +69,9 @@ router.get('/:id', jsonParser, function (req, res) {
             for (var i in question.answers) {
                 answers.push(question.answers[i])
             }
-            if (!views.includes(user)) {
+            if (!views.includes(req.body.current_user)) {
                 console.log("not included, views " + views)
-                views.push(user)
+                views.push(req.body.current_user)
                 db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
                     if (err) throw err;
                     console.log("1 views updated");
@@ -84,10 +83,10 @@ router.get('/:id', jsonParser, function (req, res) {
             delete question._id
             delete question.answers
             question['answer_count'] = answers.length
-            db.collection('users').find({ 'username': user }).toArray(function (err, res) {
+            db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                 if (err) console.log(err)
                 question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
-                res.json({ 'status': 'OK', 'question': question })
+                res.json({ 'status': 'OK', 'question': question})
             })
         }
     })
@@ -236,7 +235,7 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
                 downvoters.push(req.body.current_user)
                 //console.log("6")
             }
-            var username = result[0].user.username
+            var username = result[0].user
             db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'upvoters': upvoters, 'downvoters': downvoters, 'score': result[0].score + changed } }, function (err, res) { //,{$inc:{'score':changed}}
                 if (err) console.log(err);
                 console.log(req.params.id + " vote updated");
@@ -247,9 +246,9 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
             })
             db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
                 if (err) console.log(err);
-                console.log(username + "reputation <=1")
+                console.log(username + " reputation <=1")
             })
-            res.json({ 'status': 'OK' }, { 'changed': changed })
+            res.json({ 'status': 'OK' })
         }
     })
 })

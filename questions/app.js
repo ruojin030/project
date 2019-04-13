@@ -12,8 +12,10 @@ app.use(cookieSession({
   }))
 
 var questions = require("./routers/questions")
+var answers = require("./routers/answers")
 
 app.use('/questions',questions)
+app.use('/answers',answers)
 app.get('/',function(req, res){
     res.send("hello")
 })

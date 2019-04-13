@@ -5,182 +5,256 @@ var router = express.Router();
 var jsonParser = bodyParser.json()
 
 
-router.get('/add',function(req,res){
+router.get('/add', function (req, res) {
     res.sendFile('/../questions.html');
 });
-router.post('/add',jsonParser,function(req,res){
-    var user = req.body.current_user
-    //var user = "FAKEUSER!"
+router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    const qCollection = db.collection('questions')
-    console.log(req.body)
-    if(req.body.current_user == null){
-        return res.json({'status':'error','error':'user not login'})
-    }else{
-        db.collection('users').find({'username':req.body.current_user}).toArray(function(err,result){
-            if(result.length!= 1){
-                return res.json({'status':'error','error':'user not match'})
-            }else{
-                var userReputation = result[0].reputation
-                if(req.body.title == null||req.body.body == null||req.body.tags == null){
-                    return res.json({'status':'error','error':'wrong request type'})
-                }  
+    console.log("/add" + req.body)
+    if (req.body.current_user == null) {
+        return res.json({ 'status': 'error', 'error': 'user not login' })
+    } else {
+        db.collection('users').find({ 'username': req.body.current_user }).toArray(function (err, result) {
+            if (result.length != 1) {
+                return res.json({ 'status': 'error', 'error': 'user not match' })
+            } else {
+                if (req.body.title == null || req.body.body == null || req.body.tags == null) {
+                    return res.json({ 'status': 'error', 'error': 'wrong request type' })
+                }
                 var data = {}
-                data['id'] = uniqid.time();
-                data['user'] = {'username':req.body.current_user,'reputation':userReputation}
+                data['id'] = uniqid();
+                data['user'] = req.body.current_user
                 data['title'] = req.body.title
-                data['body'] = req.body.body 
+                data['body'] = req.body.body
                 data['score'] = 0
                 data['views'] = []
                 data['answers'] = []
-                data['timestamp'] = Date.now()/1000
-                data['media'] = null
+                data['timestamp'] = Date.now() / 1000
+                data['media'] = req.body.media
                 data['tags'] = req.body.tags
                 data['accepted_answer_id'] = null
-                //console.log(data)  
-                qCollection.insertOne(data,function(err,result){
+                data['upvoters'] = []
+                data['downvoters'] = []
+                db.collection('questions').insertOne(data, function (err, result) {
                     if (err) {
                         console.log(err);
-                        res.json({'status':'error','error':'unable to insert data'})
-                    }else{
-                        console.log(data.id+" question inserted");
-                        res.json({'status':"OK",'id':data.id})
+                        res.json({ 'status': 'error', 'error': 'unable to insert data' })
+                    } else {
+                        console.log(data.id + " question inserted");
+                        res.json({ 'status': "OK", 'id': data.id })
                     }
                 })
             }
-        })    
+        })
     }
 });
 
-router.get('/:id',jsonParser,function(req,res){
-    var qID = req.params.id
+router.get('/:id', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    db.collection('questions').find({'id':req.params.id}).toArray(function(err,result){
-        if(result.length != 1){
-            return res.json({'status':'error','error':'question not found'})
+    db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
+        if (result.length != 1) {
+            return res.json({ 'status': 'error', 'error': 'question not found' })
         }
-        else{
-            var question = result[0]  
+        else {
+            var question = result[0]
             var user = req.body.current_user
-            //var user = "####FAKEUser!!!"
-            if(user == null){ //count by IP
+            if (user == null) { //count by IP
                 user = req.connection.remoteAddress
             }
             var views = []
-            console.log(question.views)
-            for(var i in question.views){
+            //console.log(question.views)
+            for (var i in question.views) {
                 views.push(question.views[i])
             }
             var answers = []
-            for(var i in question.answers){
+            for (var i in question.answers) {
                 answers.push(question.answers[i])
             }
-            if(!views.includes(user)){
-                console.log("not included, views "+views)
+            if (!views.includes(user)) {
+                console.log("not included, views " + views)
                 views.push(user)
-                db.collection('questions').updateOne({'id':req.params.id }, { $set: {'views': views}}, function(err, res) {
+                db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
                     if (err) throw err;
                     console.log("1 views updated");
-            });
-        }
-        question['view_count'] = views.length
-        delete question.views
-        delete question._id
-        delete question.answers
-        question['answer_count'] = answers.length
-        res.json({'status':'OK','question':question}) 
+                });
+            }
+
+            question['view_count'] = views.length
+            delete question.views
+            delete question._id
+            delete question.answers
+            question['answer_count'] = answers.length
+            db.collection('users').find({ 'username': user }).toArray(function (err, res) {
+                if (err) console.log(err)
+                question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
+                res.json({ 'status': 'OK', 'question': question })
+            })
         }
     })
-    
+
 })
 
 
-router.post('/:id/answers/add',jsonParser,function(req,res){
-    var qID = req.params.id
-    var user = req.body.current_user
-    //var user = "FAKEUSER"
+router.post('/:id/answers/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    const qCollection = db.collection('questions')
-    if (req.body.current_user == null){
-        return res.json({'status':'error','error':'you have to login to answer'} )
-    }else{
-        qCollection.find({'id':req.params.id}).toArray(function(err,result){
-            if(result.length!= 1){
-                return res.json({'status':'error','error':'question not found'} )
+    if (req.body.current_user == null) {
+        return res.json({ 'status': 'error', 'error': 'you have to login to answer' })
+    } else {
+        var answer = req.body
+        const id = uniqid("A")
+        answer['id'] = id
+        answer['score'] = 0
+        answer['user'] = req.body.current_user
+        answer['is_accepted'] = false
+        answer['timestamp'] = Date.now() / 1000
+        answer['media'] = req.body.media
+        answer['voters'] = {}
+        answer['questionID'] = req.params.id
+        db.collection('answers').insertOne(answer,function(err,res){
+            if (err) console.log(err)
+            else console.log("insert answer success")
+        })
+        db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
+            if (result.length != 1) {
+                return res.json({ 'status': 'error', 'error': 'question not found' })
             }
-            else{ 
+            else {
                 var question = result[0]
-                var answer = req.body
-                answer['id'] = uniqid.time("A")
-                answer['score'] = 0
-                answer['user'] = req.body.current_user
-                answer['is_accepted'] = false
-                answer['timestamp'] = Date.now()/1000
-                //console.log(answer)
                 var answers = []
-                for(var i in question.answers){
+                for (var i in question.answers) {
                     answers.push(question.answers[i])
                 }
-                answers.push(answer)
-                qCollection.updateOne({'id':req.params.id}, {$set:{'answers':answers}},function(err, res) {
+                answers.push(id)
+                db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
                     if (err) throw err;
-                    console.log("answer "+answer.id+" updated");
+                    console.log("question:"+req.params.id+"add one answer");
                 });
-                res.json({'status':'OK','id':answer.id})
+                res.json({ 'status': 'OK', 'id': id })
             }
+        })
+    }
+})
+router.get('/:id/answers', function (req, res) {
+    var db = req.app.locals.db
+    db.collection('answers').find({'questionID':req.params.id}).toArray(function(err,result){
+        if(err) console.log(err);
+        else{
+            return  res.json({'status':'OK','answers':result})
+        }
     })
-}
+
     
 })
-router.get('/:id/answers',function(req,res){
-    const qID = req.params.id
+router.delete('/:id', jsonParser, function (req, res) {
+    //need to delete the media
     var db = req.app.locals.db
-    const qCollection = db.collection('questions')
-    var question = {}
-    qCollection.find({'id':req.params.id}).toArray(function(err,result){
-        if(result.length!= 1){
-            return res.json({'status':'error','error':'question not found'} )
-        }
-        else{
-            question = result[0]
-            var answers = []
-            for(var i in question.answers){
-                answers.push(question.answers[i])
-            }
-            res.json({'status':'OK', 'answers':answers})
-        }
-    })
-})
-router.delete('/:id',jsonParser,function(req,res){
-    //201 not login 202 incorrect id 203 user and session user not same 204 delete fail
-    var db = req.app.locals.db
-    if(req.body.current_user == null){
+    if (req.body.current_user == null) {
         res.status(403)
-        return res.json({'status':'error'})
-        
+        return res.json({ 'status': 'error' })
+
     }
     console.log(req.body.current_user)
-    db.collection('questions').find({'id':req.params.id}).toArray(function(err,result){
-        if(result.length!= 1){
+    db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
+        if (result.length != 1) {
             res.status(403)
-            return res.json({'status':'error'})
-        }else{
+            return res.json({ 'status': 'error'})
+        } else {
             var question = result[0]
-            if(question.user.username != req.body.current_user){
+            if (question.user.username != req.body.current_user) {
                 res.status(403)
-                return res.json({'status':'error'})
-            }else{
-                db.collection('questions').deleteOne({'id':req.params.id}, function(err,obj){
-                    if(err) {res.status(403)
-                    return res.json({'status':'error'})}
-                    console.log(req.params.id+" question delete")
+                return res.json({ 'status': 'error' })
+            } else {
+                db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
+                    if (err) {
+                        res.status(403)
+                        return res.json({ 'status': 'error' })
+                    }
+                    console.log(req.params.id + " question delete")
 
-                    res.json({'status':'OK'})
+                    res.json({ 'status': 'OK' })
                 })
-            }    
+            }
         }
     })
 })
+
+router.post('/:id/upvote', jsonParser, function (req, res) {
+    var db = req.app.locals.db
+
+    if (req.body.current_user == null) {
+        return res.json({ 'status': 'error', 'error': 'you have to login to vote' })
+    }
+    if (req.body.upvote == null) {
+        req.body.upvote = true
+        console.log("hit!")
+    }
+    db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
+        if (result.length != 1) {
+            return res.json({ 'status': 'error', 'error': 'question not found' })
+        }
+        else {
+            var upvoters = []
+            var downvoters = []
+            var hasUpVote = false
+            var hasDownVote = false
+            var changed = 0
+            for (var i in result[0].upvoters) {
+                if (result[0].upvoters[i] == req.body.current_user) {
+                    hasUpVote = true
+                } else {
+                    upvoters.push(result[0].upvoters[i])
+                }
+            }
+            for (var i in result[0].downvoters) {
+                if (result[0].downvoters[i] == req.body.current_user) {
+                    hasDownVote = true
+                } else {
+                    downvoters.push(result[0].downvoters[i])
+                }
+            }
+            //console.log(req.body.upvote)
+            if (req.body.upvote && hasUpVote && !hasDownVote) { // undo upvote
+                changed--
+                //console.log("1")
+            } else if (req.body.upvote && !hasUpVote && !hasDownVote) { // upvote
+                changed++
+                upvoters.push(req.body.current_user)
+                //console.log("2")
+            } else if (!req.body.upvote && hasDownVote && !hasUpVote) { //undo downvote
+                changed++
+                //console.log("3")
+            } else if (!req.body.upvote && !hasDownVote && !hasUpVote) { //downvote
+                changed--
+                downvoters.push(req.body.current_user)
+                //console.log("4")
+            } else if (req.body.upvote && hasDownVote && !hasUpVote) { //change downvote to upvote
+                changed += 2
+                upvoters.push(req.body.current_user)
+                //console.log("5")
+            } else if (!req.body.upvote && hasUpVote && !hasDownVote) { //change upvote to downvote
+                changed -= 2
+                downvoters.push(req.body.current_user)
+                //console.log("6")
+            }
+            var username = result[0].user.username
+            db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'upvoters': upvoters, 'downvoters': downvoters, 'score': result[0].score + changed } }, function (err, res) { //,{$inc:{'score':changed}}
+                if (err) console.log(err);
+                console.log(req.params.id + " vote updated");
+            });
+            db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
+                if (err) console.log(err);
+                console.log(username + " reputation updated")
+            })
+            db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
+                if (err) console.log(err);
+                console.log(username + "reputation <=1")
+            })
+            res.json({ 'status': 'OK' }, { 'changed': changed })
+        }
+    })
+})
+
+
 
 
 

@@ -3,14 +3,15 @@ var bodyParser = require('body-parser');
 var uniqid = require("uniqid");
 var router = express.Router();
 var jsonParser = bodyParser.json()
+var path = require('path');
 
 
-router.get('/add', function (req, res) {
-    res.sendFile('/../questions.html');
+router.get('/', function (req, res) {
+    res.sendFile(path.resolve('../questions/questions.html'));
 });
 router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    console.log("/add" + req.body)
+    //console.log(req)
     if (req.body.current_user == null) {
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {
@@ -70,11 +71,11 @@ router.get('/:id', jsonParser, function (req, res) {
                 answers.push(question.answers[i])
             }
             if (!views.includes(req.body.current_user)) {
-                console.log("not included, views " + views)
+                //console.log("not included, views " + views)
                 views.push(req.body.current_user)
                 db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
-                    if (err) throw err;
-                    console.log("1 views updated");
+                    if (err) throw console.log(err);
+                    //console.log("1 views updated");
                 });
             }
 
@@ -96,7 +97,7 @@ router.get('/:id', jsonParser, function (req, res) {
 
 router.post('/:id/answers/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    if (req.body.current_user == null) {
+    if (req.body. == null) {
         return res.json({ 'status': 'error', 'error': 'you have to login to answer' })
     } else {
         var answer = req.body
@@ -111,7 +112,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['questionID'] = req.params.id
         db.collection('answers').insertOne(answer,function(err,res){
             if (err) console.log(err)
-            else console.log("insert answer success")
+            else //log("insert answer success")
         })
         db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
             if (result.length != 1) {
@@ -126,7 +127,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                 answers.push(id)
                 db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
                     if (err) throw err;
-                    console.log("question:"+req.params.id+"add one answer");
+                    //console.log("question:"+req.params.id+"add one answer");
                 });
                 res.json({ 'status': 'OK', 'id': id })
             }
@@ -152,7 +153,7 @@ router.delete('/:id', jsonParser, function (req, res) {
         return res.json({ 'status': 'error' })
 
     }
-    console.log(req.body.current_user)
+    //console.log(req.body.current_user)
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(403)
@@ -168,7 +169,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                         res.status(403)
                         return res.json({ 'status': 'error' })
                     }
-                    console.log(req.params.id + " question delete")
+                    //console.log(req.params.id + " question delete")
 
                     res.json({ 'status': 'OK' })
                 })
@@ -185,7 +186,7 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
     }
     if (req.body.upvote == null) {
         req.body.upvote = true
-        console.log("hit!")
+        //console.log("hit!")
     }
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
@@ -238,15 +239,15 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
             var username = result[0].user
             db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'upvoters': upvoters, 'downvoters': downvoters, 'score': result[0].score + changed } }, function (err, res) { //,{$inc:{'score':changed}}
                 if (err) console.log(err);
-                console.log(req.params.id + " vote updated");
+                //console.log(req.params.id + " vote updated");
             });
             db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
                 if (err) console.log(err);
-                console.log(username + " reputation updated")
+                //console.log(username + " reputation updated")
             })
             db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
                 if (err) console.log(err);
-                console.log(username + " reputation <=1")
+                //console.log(username + " reputation <=1")
             })
             res.json({ 'status': 'OK' })
         }

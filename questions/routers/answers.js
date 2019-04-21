@@ -24,27 +24,27 @@ router.post('/:id/upvote',jsonParser,function(req,res){
         if(his == null && req.body.upvote){ //upvote
             changed ++
             voters[req.body.current_user] = 1
-            console.log("upvote")
+            //console.log("upvote")
         }else if(his == null && !req.body.upvote){ //downvote
             changed --
             voters[req.body.current_user] = -1
-            console.log("downvote")
+            //console.log("downvote")
         }else if(his == 1 && req.body.upvote){ //undo upvote
             changed --
             delete voters[req.body.current_user]
-            console.log("undo upvote")
+            //console.log("undo upvote")
         }else if(his == 1 && !req.body.upvote){ //changed upvote to downvote
             changed -=2
             voters[req.body.current_user] = -1
-            console.log("changed upvote to downvote")
+            //console.log("changed upvote to downvote")
         }else if(his == -1 && !req.body.upvote){ //undo downvote
             changed ++
             delete voters[req.body.upvote]
-            console.log("undo downvote")
+            //console.log("undo downvote")
         }else if(his == -1 &&req.body.upvote){//changed downvote to upvote
             changed +=2
             voters[req.body.current_user] = 1
-            console.log("changed downvote to upvote")
+            //console.log("changed downvote to upvote")
         }
         db.collection('answers').updateOne({'id':req.params.id},{$set:{'voters':voters,'score':result[0].score+changed},function(err,result){
             if(err) console.log(err)
@@ -76,11 +76,11 @@ router.post('/:id/accept',jsonParser,function(req,res){
             if(err) console.log(err)
             if(result[0].accepted_answer_id == null && result[0].user== req.body.current_user){
                 db.collection('questions').updateOne({'id':qid},{$set:{'accepted_answer_id':req.params.id}},function(err,result){
-                    console.log('question accepted answer success')
+                    //console.log('question accepted answer success')
                 })
                 db.collection('answers').updateOne({'id':req.params.id},{$set:{'is_accepted':true}},function(err,res){
                     if(err) console.log(err)
-                    console.log('answer accepted success')
+                    //console.log('answer accepted success')
                 })
                 res.json({'status':OK})
             }

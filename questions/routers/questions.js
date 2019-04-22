@@ -112,7 +112,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['questionID'] = req.params.id
         db.collection('answers').insertOne(answer,function(err,res){
             if (err) console.log(err)
-            else //log("insert answer success")
+
         })
         db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
             if (result.length != 1) {

@@ -97,7 +97,7 @@ router.get('/:id', jsonParser, function (req, res) {
 
 router.post('/:id/answers/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    if (req.body. == null) {
+    if (req.body.current_user == null) {
         return res.json({ 'status': 'error', 'error': 'you have to login to answer' })
     } else {
         var answer = req.body

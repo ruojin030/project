@@ -1,7 +1,7 @@
 var express = require('express');
 const app = express()
 const MongoClient = require('mongodb').MongoClient;
-const mongo_address = 'mongodb://130.245.171.133:27017';
+const mongo_address = 'mongodb://192.168.122.24:27017';
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json()
 var sleep = require('sleep');
@@ -14,7 +14,6 @@ app.get('/', function (req, res) {
 
 app.post('/search', jsonParser, function (req, res) {
     //console.log("nobody nobody but u <3")
-    sleep.msleep(500)
     var timestamp = req.body.timestamp
     var limit = req.body.limit
     var accepted = req.body.accepted

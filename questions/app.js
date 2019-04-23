@@ -1,7 +1,7 @@
 var express = require('express');
 const app = express()
 const MongoClient = require('mongodb').MongoClient;
-const mongo_address = 'mongodb://192.168.122.24:27017';
+const mongo_address = 'mongodb://192.168.122.39:27017';
 const cookieSession = require('cookie-session');
 
 const port = 3000

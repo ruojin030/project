@@ -47,6 +47,9 @@ app.post('/search', jsonParser, function (req, res) {
     if(req.body.tags!= null){
         query.tags = {$all:req.body.tags}
     }
+    if(req.body.has_media){
+        query.media =  { $size: {$ne:0}}
+    }
 
     if (req.body.q != null && req.body.q != "") {
         query.$text = { $search: req.body.q, $language: "none" }//$diacriticSensitive: false,$caseSensitive: false}//{$search:q}//

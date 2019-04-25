@@ -39,7 +39,7 @@ router.post('/add', jsonParser, function (req, res) {
                 data['accepted_answer_id'] = null
                 data['upvoters'] = []
                 data['downvoters'] = []
-                db.collection("medias").find({ "poster": req.body.current_user, "userd": false }).toArray(function (err, result) {
+                db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
                     if (result == null && req.body.media.length != 0) {
                         return res.json({ 'status': 'error', 'error': 'media error' })
                     } else {
@@ -53,6 +53,9 @@ router.post('/add', jsonParser, function (req, res) {
                             return res.json({ 'status': 'error', 'error': 'media error' })
                         } else {
                             db.collection('questions').insertOne(data)
+                            for (i = 0; i < req.body.media; i++){
+                                db.collection("medias").updateOne({"id":req.body.media[i]},{"used":true})
+                            }
                             res.json({ 'status': "OK", 'id': data.id })
                         }
                     }
@@ -125,7 +128,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['media'] = req.body.media
         answer['voters'] = {}
         answer['questionID'] = req.params.id
-        db.collection("medias").find({ "poster": req.body.current_user, "userd": false }).toArray(function (err, result) {
+        db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
             if (result == null && req.body.media.length != 0) {
                 return res.json({ 'status': 'error', 'error': 'media error' })
             } else {
@@ -157,6 +160,9 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                                 if (err) throw err;
                                 //console.log("question:"+req.params.id+"add one answer");
                             });
+                            for (i = 0; i < req.body.media; i++){
+                                db.collection("medias").updateOne({"id":req.body.media[i]},{"used":true})
+                            }
                             res.json({ 'status': 'OK', 'id': id })
                         }
                     })

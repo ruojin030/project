@@ -206,12 +206,12 @@ router.delete('/:id', jsonParser, function (req, res) {
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(403)
-            return res.json({ 'status': 'error' })
+            return res.json({ 'status': 'error','error':'id wrong' })
         } else {
             var question = result[0]
             if (question.user.username != req.body.current_user) {
                 res.status(403)
-                return res.json({ 'status': 'error' })
+                return res.json({ 'status': 'error','error':'not poster' })
             } else {
                 for (i in result[0].media) {
                     media.append(result[0].media[i])
@@ -219,7 +219,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                 db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
                     if (err) {
                         res.status(403)
-                        return res.json({ 'status': 'error' })
+                        return res.json({ 'status': 'error','error':'delete failed' })
                     }
                     db.collection('answers').find({ 'questionID': req.params.id }, function (err, result) {
                         for (i in result[0].media) {

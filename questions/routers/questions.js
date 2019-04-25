@@ -62,7 +62,7 @@ router.post('/add', jsonParser, function (req, res) {
                             console.log("123")
                             for (i in req.body.media){
                                 console.log(req.body.media[i])
-                                db.collection("medias").updateOne({"id":req.body.media[i]},{"used":true})
+                                db.collection("medias").updateOne({"id":req.body.media[i]},{$set:{"used":true}})
                             }
                             db.collection('questions').insertOne(data)
                             res.json({ 'status': "OK", 'id': data.id })

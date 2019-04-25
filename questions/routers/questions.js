@@ -56,7 +56,7 @@ router.post('/add', jsonParser, function (req, res) {
                 })  
             //}
         //})
-    }
+    //}
 });
 
 router.get('/:id', jsonParser, function (req, res) {

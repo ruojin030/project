@@ -23,6 +23,9 @@ router.post('/add', jsonParser, function (req, res) {
                 if (req.body.title == null || req.body.body == null || req.body.tags == null) {
                     return res.json({ 'status': 'error', 'error': 'wrong request type' })
                 }
+                if(req.body.media == null){
+                    req.body.media = []
+                }
                 var data = {}
                 data['id'] = uniqid();
                 data['user'] = req.body.current_user

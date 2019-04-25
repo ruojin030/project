@@ -38,7 +38,7 @@ router.post('/add', jsonParser, function (req, res) {
                 data['upvoters'] = []
                 data['downvoters'] = []
                 db.collection('questions').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-                    console.log(result)
+                    console.log(result.length)
                     if(result.length!=0){
                         return res.json({ 'status': 'error', 'error': 'media in questions' })
                     }else{

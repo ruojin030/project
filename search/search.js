@@ -29,20 +29,31 @@ app.post('/search', jsonParser, function (req, res) {
     if (req.body.limit > 100) {
         req.body.limit = 100
     }
+    sort_q = {}
+    if(req.body.sort_by == null||req.body.sort_by == "score"){
+        sort_q = {"score":1}
+    }else{
+        sort_q = {"timestamp":1}
+    }
     if (typeof req.body.accepted != "boolean") {
         req.body.accepted = false
     }
     var db = req.app.locals.db
     var query = { 'timestamp': { $lt: req.body.timestamp } }
+
     if (req.body.accepted) {
         query.accepted_answer_id = { $ne: null }
     }
+    if(req.body.tags!= null){
+        query.tags = {$all:req.body.tags}
+    }
+
     if (req.body.q != null && req.body.q != "") {
         query.$text = { $search: req.body.q, $language: "none" }//$diacriticSensitive: false,$caseSensitive: false}//{$search:q}//
         console.log(query)
     }
 
-    db.collection('questions').find(query).limit(req.body.limit).sort({ 'timestamp': 1 }).toArray(function (err, result) {
+    db.collection('questions').find(query).limit(req.body.limit).sort(sort_q).toArray(function (err, result) {
         if (err) throw err;
         console.log("THE NUM OF RESULT IS " + result.length)
         var questions = []

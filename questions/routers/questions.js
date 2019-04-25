@@ -24,6 +24,9 @@ router.post('/add', jsonParser, function (req, res) {
                 }
                 if (req.body.media == null) {
                     req.body.media = []
+                    data['has_media'] = false
+                }else{
+                    data['has_media'] = true
                 }
                 var data = {}
                 data['id'] = uniqid();

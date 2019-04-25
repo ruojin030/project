@@ -36,15 +36,21 @@ router.post('/add', jsonParser, function (req, res) {
                 data['accepted_answer_id'] = null
                 data['upvoters'] = []
                 data['downvoters'] = []
-                db.collection('questions').insertOne(data, function (err, result) {
-                    if (err) {
-                        console.log(err);
-                        res.json({ 'status': 'error', 'error': 'unable to insert data' })
-                    } else {
-                        console.log(data.id + " question inserted");
-                        res.json({ 'status': "OK", 'id': data.id })
+                db.collection('questions').find({'media':{$in:req.body.media}}).toArray(function(err,result){
+                    if(result.length!= 0){
+                        return res.json({ 'status': 'error', 'error': 'media in questions' })
+                    }else{
+                        db.collection('answers').find({'media':{$in:req.body.media}}).toArray(function(err,result){
+                            if(result.length!= 0){
+                                return res.json({ 'status': 'error', 'error': 'media in answer' })
+                            }
+                            else{
+                                db.collection('questions').insertOne(data)
+                                res.json({ 'status': "OK", 'id': data.id })
+                            }
+                        })
                     }
-                })
+                })  
             }
         })
     }
@@ -110,6 +116,42 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['media'] = req.body.media
         answer['voters'] = {}
         answer['questionID'] = req.params.id
+        
+        db.collection('questions').find({'media':{$in:req.body.media}}).toArray(function(err,result){
+            if(result.length!= 0){
+                return res.json({ 'status': 'error', 'error': 'media in questions' })
+            }else{
+                db.collection('answers').find({'media':{$in:req.body.media}}).toArray(function(err,result){
+                    if(result.length!= 0){
+                        return res.json({ 'status': 'error', 'error': 'media in answer' })
+                    }
+                    else{
+                        db.collection('answers').insertOne(answer,function(err,res){
+                            if (err) console.log(err)
+                
+                        })
+                        db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
+                            if (result.length != 1) {
+                                return res.json({ 'status': 'error', 'error': 'question not found' })
+                            }
+                            else {
+                                var question = result[0]
+                                var answers = []
+                                for (var i in question.answers) {
+                                    answers.push(question.answers[i])
+                                }
+                                answers.push(id)
+                                db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
+                                    if (err) throw err;
+                                    //console.log("question:"+req.params.id+"add one answer");
+                                });
+                                res.json({ 'status': 'OK', 'id': id })
+                            }
+                        })
+                    }
+                })
+            }
+        }) 
         db.collection('answers').insertOne(answer,function(err,res){
             if (err) console.log(err)
 

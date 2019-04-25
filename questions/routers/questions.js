@@ -91,7 +91,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 answers.push(question.answers[i])
             }
             if (!views.includes(req.body.current_user)) {
-                //console.log("not included, views " + views)
+                console.log("not included, views " + views)
                 views.push(req.body.current_user)
                 db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
                     if (err) throw console.log(err);
@@ -100,7 +100,6 @@ router.get('/:id', jsonParser, function (req, res) {
             }
 
             question['view_count'] = views.length
-            delete question.views
             delete question._id
             delete question.answers
             question['answer_count'] = answers.length

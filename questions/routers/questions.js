@@ -307,14 +307,14 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
                 if (err) console.log(err);
                 //console.log(req.params.id + " vote updated");
             });
-            /* db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
+             db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
                 if (err) console.log(err);
                 console.log(username + " reputation updated "+changed)
-            }) */
-            db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
+            }) 
+            /* db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
                 if (err) console.log(err);
                 //console.log(username + " reputation <=1")
-            })
+            }) */
             res.json({ 'status': 'OK' })
         }
     })

@@ -46,7 +46,7 @@ router.post('/add', jsonParser, function (req, res) {
                     } else {
                         m = []
                         for(i in result){
-                            m.append(result[i].id)
+                            m.push(result[i].id)
                         }
                         console.log(m)
                         correct = true

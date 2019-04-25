@@ -127,6 +127,9 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         const id = uniqid("A")
         if (req.body.media == null) {
             req.body.media = []
+            answer['has_media'] = false
+        }else{
+            answer['has_media'] = true
         }
         answer['id'] = id
         answer['score'] = 0

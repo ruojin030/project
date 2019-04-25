@@ -82,7 +82,7 @@ router.post('/:id/accept',jsonParser,function(req,res){
                     if(err) console.log(err)
                     //console.log('answer accepted success')
                 })
-                res.json({'status':OK})
+                res.json({'status':'OK'})
             }
             else{
                 return res.json({'status':'error','error':'already accepted or not the asker'})

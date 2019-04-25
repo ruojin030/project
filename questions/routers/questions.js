@@ -105,8 +105,9 @@ router.get('/:id', jsonParser, function (req, res) {
             question['answer_count'] = answers.length
             db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                 if (err) console.log(err)
-                if(result[0].reputation<1)
+                if(result[0].reputation<1){
                     result[0].reputation = 1
+                }
                 question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
                 res.json({ 'status': 'OK', 'question': question })
             })

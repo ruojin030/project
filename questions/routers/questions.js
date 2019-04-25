@@ -105,6 +105,8 @@ router.get('/:id', jsonParser, function (req, res) {
             question['answer_count'] = answers.length
             db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                 if (err) console.log(err)
+                if(result[0].reputation<1)
+                    result[0].reputation = 1
                 question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
                 res.json({ 'status': 'OK', 'question': question })
             })
@@ -277,11 +279,11 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
             //console.log(req.body.upvote)
             if (req.body.upvote && hasUpVote && !hasDownVote) { // undo upvote
                 changed--
-                console.log(req.params.id+"undo upvote")
+                console.log(req.params.id+" undo upvote")
             } else if (req.body.upvote && !hasUpVote && !hasDownVote) { // upvote
                 changed++
                 upvoters.push(req.body.current_user)
-                console.log(req.params.id+"upvote")
+                console.log(req.params.id+" upvote")
             } else if (!req.body.upvote && hasDownVote && !hasUpVote) { //undo downvote
                 changed++
                 console.log(req.params.id+"undo downvote")
@@ -303,10 +305,10 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
                 if (err) console.log(err);
                 //console.log(req.params.id + " vote updated");
             });
-            db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
+            /* db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
                 if (err) console.log(err);
-                console.log(username + " reputation updated"+changed)
-            })
+                console.log(username + " reputation updated "+changed)
+            }) */
             db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
                 if (err) console.log(err);
                 //console.log(username + " reputation <=1")

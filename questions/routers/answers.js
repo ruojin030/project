@@ -24,27 +24,27 @@ router.post('/:id/upvote',jsonParser,function(req,res){
         if(his == null && req.body.upvote){ //upvote
             changed ++
             voters[req.body.current_user] = 1
-            //console.log("upvote")
+            console.log("upvote")
         }else if(his == null && !req.body.upvote){ //downvote
             changed --
             voters[req.body.current_user] = -1
-            //console.log("downvote")
+            console.log("downvote")
         }else if(his == 1 && req.body.upvote){ //undo upvote
             changed --
             delete voters[req.body.current_user]
-            //console.log("undo upvote")
+            console.log("undo upvote")
         }else if(his == 1 && !req.body.upvote){ //changed upvote to downvote
             changed -=2
             voters[req.body.current_user] = -1
-            //console.log("changed upvote to downvote")
+            console.log("changed upvote to downvote")
         }else if(his == -1 && !req.body.upvote){ //undo downvote
             changed ++
             delete voters[req.body.upvote]
-            //console.log("undo downvote")
+            console.log("undo downvote")
         }else if(his == -1 &&req.body.upvote){//changed downvote to upvote
             changed +=2
             voters[req.body.current_user] = 1
-            //console.log("changed downvote to upvote")
+            console.log("changed downvote to upvote")
         }
         db.collection('answers').updateOne({'id':req.params.id},{$set:{'voters':voters,'score':result[0].score+changed},function(err,result){
             if(err) console.log(err)
@@ -52,12 +52,12 @@ router.post('/:id/upvote',jsonParser,function(req,res){
         }})
         db.collection('users').updateOne({'username':user},{$inc:{'reputation':changed}},function(err,result){
             if(err) console.log(err)
-            //console.log('user reputation update success')
+            console.log(user + " reputation "+ changed)
         })
-        db.collection('users').updateOne({'username':user},{$max:{'reputation':1}},function(err,result){
+        /* db.collection('users').updateOne({'username':user},{$max:{'reputation':1}},function(err,result){
             if(err) console.log(err)
             //console.log('try to fix gt 1')
-        })
+        }) */
         res.json({'status':"OK"})
     })
 })

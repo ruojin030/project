@@ -50,7 +50,7 @@ router.post('/add', jsonParser, function (req, res) {
                         }
                         console.log(m)
                         correct = true
-                        for (i = 0; i < req.body.media; i++) {
+                        for (i in req.body.media) {
                             if (!m.includes(req.body.media[i])) {
                                 correct = false
                                 console.log("h")

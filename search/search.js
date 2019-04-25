@@ -48,7 +48,7 @@ app.post('/search', jsonParser, function (req, res) {
         query.tags = {$all:req.body.tags}
     }
     if(req.body.has_media){
-        query.media =  { $size: {$ne:0}}
+        query.has_media =  true
     }
 
     if (req.body.q != null && req.body.q != "") {

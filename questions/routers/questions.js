@@ -53,6 +53,7 @@ router.post('/add', jsonParser, function (req, res) {
                         for (i = 0; i < req.body.media; i++) {
                             if (!m.includes(req.body.media[i])) {
                                 correct = false
+                                console.log("h")
                             }
                         }
                         if (!correct) {

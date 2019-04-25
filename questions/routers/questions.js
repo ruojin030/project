@@ -76,9 +76,10 @@ router.get('/:id', jsonParser, function (req, res) {
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
-            console.log("getQuestion "+ req.params.id)
+            console.log(req.body.current_user+" getQuestion "+ req.params.id)
             var question = result[0]
             if (req.body.current_user == null) { //count by IP
+                console.log("use ip")
                 req.body.current_user = req.connection.remoteAddress
             }
             var views = []
@@ -98,7 +99,7 @@ router.get('/:id', jsonParser, function (req, res) {
                     //console.log("1 views updated");
                 });
             }
-            
+
             question['view_count'] = views.length
             delete question._id
             delete question.answers

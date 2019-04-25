@@ -222,9 +222,11 @@ router.delete('/:id', jsonParser, function (req, res) {
                         return res.json({ 'status': 'error','error':'delete failed' })
                     }
                     db.collection('answers').find({ 'questionID': req.params.id }, function (err, r) {
+                        console.log(r)
                         if(r!= null){
                         if(r.length != 0){
                             for(j in r){
+                                console.log(r[j])
                                 for (i in r[j].media) {
                                     media.push(r[j].media[i])
                                 }

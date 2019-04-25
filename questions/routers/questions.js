@@ -60,7 +60,7 @@ router.post('/add', jsonParser, function (req, res) {
                             return res.json({ 'status': 'error', 'error': 'media error' })
                         } else {
                             console.log("123")
-                            for (i = 0; i < req.body.media; i++){
+                            for (i in req.body.media){
                                 console.log(req.body.media[i])
                                 db.collection("medias").updateOne({"id":req.body.media[i]},{"used":true})
                             }

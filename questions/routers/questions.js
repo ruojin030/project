@@ -40,14 +40,22 @@ router.post('/add', jsonParser, function (req, res) {
                 data['upvoters'] = []
                 data['downvoters'] = []
                 db.collection('questions').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-                    if(result.length!=0){
-                        return res.json({ 'status': 'error', 'error': 'media in questions' })
-                    }else{
+                    nosame = true
+                    if(result != null){
+                        if(result.length!=0){
+                            nosame = false
+                            return res.json({ 'status': 'error', 'error': 'media in questions' })
+                        }
+                    }
+                    if(nosame){
                         db.collection('answers').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-                            if(result.length!=0){
-                                return res.json({ 'status': 'error', 'error': 'media in answer' })
+                            if(result != null){
+                                if(result.length!=0){
+                                    nosame = false
+                                    return res.json({ 'status': 'error', 'error': 'media in questions' })
+                                }
                             }
-                            else{
+                            if(nosame){
                                 db.collection('questions').insertOne(data)
                                 res.json({ 'status': "OK", 'id': data.id })
                             }
@@ -124,14 +132,22 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['questionID'] = req.params.id
         
         db.collection('questions').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-            if(result.length!=0){
-                return res.json({ 'status': 'error', 'error': 'media in questions' })
-            }else{
+            nosame = true
+            if(result != null){
+                if(result.length!=0){
+                    nosame = false
+                    return res.json({ 'status': 'error', 'error': 'media in questions' })
+                }
+            }
+            if(nosame){
                 db.collection('answers').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-                    if(result.length !=0){
-                        return res.json({ 'status': 'error', 'error': 'media in answer' })
+                    if(result != null){
+                        if(result.length!=0){
+                            nosame = false
+                            return res.json({ 'status': 'error', 'error': 'media in questions' })
+                        }
                     }
-                    else{
+                    if(nosame){
                         db.collection('answers').insertOne(answer,function(err,res){
                             if (err) console.log(err)
                 

@@ -6,6 +6,7 @@ router.get('/',function(req,res){
     db.collection('answers').remove({})
     db.collection('questions').remove({})
     db.collection('users').remove({})
+    db.collection('medias').remove({})
     res.json({"status":"ok"})
 })
 module.exports = router;

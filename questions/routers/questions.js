@@ -125,70 +125,42 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['media'] = req.body.media
         answer['voters'] = {}
         answer['questionID'] = req.params.id
-
-        db.collection('questions').find({ 'media': { $in: req.body.media } }).toArray(function (err, result) {
-            nosame = true
-            if (result != null) {
-                if (result.length != 0) {
-                    nosame = false
-                    return res.json({ 'status': 'error', 'error': 'media in questions' })
+        db.collection("medias").find({ "poster": req.body.current_user, "userd": false }).toArray(function (err, result) {
+            if (result == null && req.body.media.length != 0) {
+                return res.json({ 'status': 'error', 'error': 'media error' })
+            } else {
+                correct = true
+                for (i = 0; i < req.body.media; i++) {
+                    if (!result.includes(req.body.media[i])) {
+                        correct = false
+                    }
                 }
-            }
-            if (nosame) {
-                db.collection('answers').find({ 'media': { $in: req.body.media } }).toArray(function (err, result) {
-                    if (result != null) {
-                        if (result.length != 0) {
-                            nosame = false
-                            return res.json({ 'status': 'error', 'error': 'media in questions' })
+                if (!correct) {
+                    return res.json({ 'status': 'error', 'error': 'media error' })
+                } else {
+                    db.collection('answers').insertOne(answer, function (err, res) {
+                        if (err) console.log(err)
+
+                    })
+                    db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
+                        if (result.length != 1) {
+                            return res.json({ 'status': 'error', 'error': 'question not found' })
                         }
-                    }
-                    if (nosame) {
-                        db.collection('answers').insertOne(answer, function (err, res) {
-                            if (err) console.log(err)
-
-                        })
-                        db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
-                            if (result.length != 1) {
-                                return res.json({ 'status': 'error', 'error': 'question not found' })
+                        else {
+                            var question = result[0]
+                            var answers = []
+                            for (var i in question.answers) {
+                                answers.push(question.answers[i])
                             }
-                            else {
-                                var question = result[0]
-                                var answers = []
-                                for (var i in question.answers) {
-                                    answers.push(question.answers[i])
-                                }
-                                answers.push(id)
-                                db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
-                                    if (err) throw err;
-                                    //console.log("question:"+req.params.id+"add one answer");
-                                });
-                                res.json({ 'status': 'OK', 'id': id })
-                            }
-                        })
-                    }
-                })
-            }
-        })
-        db.collection('answers').insertOne(answer, function (err, res) {
-            if (err) console.log(err)
-
-        })
-        db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
-            if (result.length != 1) {
-                return res.json({ 'status': 'error', 'error': 'question not found' })
-            }
-            else {
-                var question = result[0]
-                var answers = []
-                for (var i in question.answers) {
-                    answers.push(question.answers[i])
+                            answers.push(id)
+                            db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
+                                if (err) throw err;
+                                //console.log("question:"+req.params.id+"add one answer");
+                            });
+                            res.json({ 'status': 'OK', 'id': id })
+                        }
+                    })
                 }
-                answers.push(id)
-                db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
-                    if (err) throw err;
-                    //console.log("question:"+req.params.id+"add one answer");
-                });
-                res.json({ 'status': 'OK', 'id': id })
             }
         })
     }

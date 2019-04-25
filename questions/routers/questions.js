@@ -199,7 +199,7 @@ router.delete('/:id', jsonParser, function (req, res) {
     var db = req.app.locals.db
     if (req.body.current_user == null) {
         res.status(403)
-        return res.json({ 'status': 'error' })
+        return res.json({ 'status': 'error','error':'not login' })
 
     }
     //console.log(req.body.current_user)
@@ -209,7 +209,7 @@ router.delete('/:id', jsonParser, function (req, res) {
             return res.json({ 'status': 'error','error':'id wrong' })
         } else {
             var question = result[0]
-            if (question.user.username != req.body.current_user) {
+            if (question.user != req.body.current_user) {
                 res.status(403)
                 return res.json({ 'status': 'error','error':'not poster' })
             } else {

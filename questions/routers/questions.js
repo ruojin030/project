@@ -277,26 +277,26 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
             //console.log(req.body.upvote)
             if (req.body.upvote && hasUpVote && !hasDownVote) { // undo upvote
                 changed--
-                //console.log("1")
+                console.log(req.params.id+"undo upvote")
             } else if (req.body.upvote && !hasUpVote && !hasDownVote) { // upvote
                 changed++
                 upvoters.push(req.body.current_user)
-                //console.log("2")
+                console.log(req.params.id+"upvote")
             } else if (!req.body.upvote && hasDownVote && !hasUpVote) { //undo downvote
                 changed++
-                //console.log("3")
+                console.log(req.params.id+"undo downvote")
             } else if (!req.body.upvote && !hasDownVote && !hasUpVote) { //downvote
                 changed--
                 downvoters.push(req.body.current_user)
-                //console.log("4")
+                console.log(req.params.id+"downvote")
             } else if (req.body.upvote && hasDownVote && !hasUpVote) { //change downvote to upvote
                 changed += 2
                 upvoters.push(req.body.current_user)
-                //console.log("5")
+                console.log(req.params.id+"change downvote to upvote")
             } else if (!req.body.upvote && hasUpVote && !hasDownVote) { //change upvote to downvote
                 changed -= 2
                 downvoters.push(req.body.current_user)
-                //console.log("6")
+                console.log(req.params.id+"change upvote to downvote")
             }
             var username = result[0].user
             db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'upvoters': upvoters, 'downvoters': downvoters, 'score': result[0].score + changed } }, function (err, res) { //,{$inc:{'score':changed}}
@@ -305,7 +305,7 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
             });
             db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
                 if (err) console.log(err);
-                //console.log(username + " reputation updated")
+                console.log(username + " reputation updated"+changed)
             })
             db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
                 if (err) console.log(err);

@@ -303,6 +303,7 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
                 console.log(req.params.id+"change upvote to downvote")
             }
             var username = result[0].user
+            console.log(result[0].score)
             db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'upvoters': upvoters, 'downvoters': downvoters, 'score': result[0].score + changed } }, function (err, res) { //,{$inc:{'score':changed}}
                 if (err) console.log(err);
                 //console.log(req.params.id + " vote updated");

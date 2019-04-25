@@ -61,6 +61,7 @@ router.post('/add', jsonParser, function (req, res) {
                         } else {
                             db.collection('questions').insertOne(data)
                             for (i = 0; i < req.body.media; i++){
+                                console.log(req.body.media[i])
                                 db.collection("medias").updateOne({"id":req.body.media[i]},{"used":true})
                             }
                             res.json({ 'status': "OK", 'id': data.id })

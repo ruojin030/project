@@ -91,7 +91,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 answers.push(question.answers[i])
             }
             if (!views.includes(req.body.current_user)) {
-                console.log("not included, views " + views)
+                console.log(req.body.current_user+ " not included, views " + views)
                 views.push(req.body.current_user)
                 db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
                     if (err) throw console.log(err);

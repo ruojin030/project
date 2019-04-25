@@ -31,7 +31,7 @@ app.post('/search', jsonParser, function (req, res) {
     }
     sort_q = {}
     if(req.body.sort_by == null||req.body.sort_by == "score"){
-        sort_q = {"score":1}
+        sort_q = {"score":-1}
     }else{
         sort_q = {"timestamp":-1}
     }

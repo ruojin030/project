@@ -221,7 +221,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                         res.status(403)
                         return res.json({ 'status': 'error', 'error': 'delete failed' })
                     }
-                    db.collection('answers').find({ 'questionID': req.params.id }.toArray(function (err, r) {
+                    db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, r) {
                         console.log(r)
                         if (r != null) {
                             if (r.length != 0) {
@@ -236,7 +236,6 @@ router.delete('/:id', jsonParser, function (req, res) {
                             }
                         }
                     })
-                    )
                 })
             }
         }

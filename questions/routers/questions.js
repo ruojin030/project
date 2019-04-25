@@ -221,12 +221,15 @@ router.delete('/:id', jsonParser, function (req, res) {
                         res.status(403)
                         return res.json({ 'status': 'error','error':'delete failed' })
                     }
-                    db.collection('answers').find({ 'questionID': req.params.id }, function (err, result) {
-                        console.log(result[0])
-                        for (i in result[0].media) {
-                            media.push(result[0].media[i])
+                    db.collection('answers').find({ 'questionID': req.params.id }, function (err, r) {
+                        if(r.length != 0){
+                            for(j in r){
+                                for (i in r[j].media) {
+                                    media.push(r[j].media[i])
+                                }
+                            }
+                            db.collection('answers').deleteMany({ 'questionID': req.params.id })
                         }
-                        db.collection('answers').deleteOne({ 'questionID': req.params.id })
                     })
                     res.json({ 'status': 'OK', 'media': media })
                 })

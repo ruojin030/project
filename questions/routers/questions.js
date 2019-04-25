@@ -98,7 +98,7 @@ router.get('/:id', jsonParser, function (req, res) {
                     //console.log("1 views updated");
                 });
             }
-
+            
             question['view_count'] = views.length
             delete question._id
             delete question.answers

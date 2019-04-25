@@ -33,7 +33,7 @@ app.post('/search', jsonParser, function (req, res) {
     if(req.body.sort_by == null||req.body.sort_by == "score"){
         sort_q = {"score":1}
     }else{
-        sort_q = {"timestamp":1}
+        sort_q = {"timestamp":-1}
     }
     if (typeof req.body.accepted != "boolean") {
         req.body.accepted = false
@@ -50,7 +50,6 @@ app.post('/search', jsonParser, function (req, res) {
     if(req.body.has_media){
         query.has_media =  true
     }
-
     if (req.body.q != null && req.body.q != "") {
         query.$text = { $search: req.body.q, $language: "none" }//$diacriticSensitive: false,$caseSensitive: false}//{$search:q}//
         console.log(query)

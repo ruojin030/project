@@ -37,11 +37,11 @@ router.post('/add', jsonParser, function (req, res) {
                 data['upvoters'] = []
                 data['downvoters'] = []
                 db.collection('questions').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-                    if(result.length!= 0){
+                    if(result!= null){
                         return res.json({ 'status': 'error', 'error': 'media in questions' })
                     }else{
                         db.collection('answers').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-                            if(result.length!= 0){
+                            if(result!= null){
                                 return res.json({ 'status': 'error', 'error': 'media in answer' })
                             }
                             else{
@@ -118,11 +118,11 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['questionID'] = req.params.id
         
         db.collection('questions').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-            if(result.length!= 0){
+            if(result!= null){
                 return res.json({ 'status': 'error', 'error': 'media in questions' })
             }else{
                 db.collection('answers').find({'media':{$in:req.body.media}}).toArray(function(err,result){
-                    if(result.length!= 0){
+                    if(result!= null){
                         return res.json({ 'status': 'error', 'error': 'media in answer' })
                     }
                     else{
@@ -181,7 +181,7 @@ router.get('/:id/answers', function (req, res) {
     db.collection('answers').find({'questionID':req.params.id}).toArray(function(err,result){
         if(err) console.log(err);
         else{
-            return  res.json({'status':'OK','answers':result})
+            return res.json({'status':'OK','answers':result})
         }
     })
 
@@ -189,6 +189,7 @@ router.get('/:id/answers', function (req, res) {
 })
 router.delete('/:id', jsonParser, function (req, res) {
     //need to delete the media
+    media = []
     var db = req.app.locals.db
     if (req.body.current_user == null) {
         res.status(403)
@@ -206,18 +207,26 @@ router.delete('/:id', jsonParser, function (req, res) {
                 res.status(403)
                 return res.json({ 'status': 'error' })
             } else {
+                for (i in result[0].media){
+                    media.append(result[0].media[i])
+                }
                 db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
                     if (err) {
                         res.status(403)
                         return res.json({ 'status': 'error' })
                     }
-                    //console.log(req.params.id + " question delete")
-
-                    res.json({ 'status': 'OK' })
+                    db.collection('answers').find({'questionID':req.params.id},function(err,result){
+                        for (i in result[0].media){
+                            media.append(result[0].media[i])
+                        }
+                        db.collection('answers').deleteOne({'questionID':req.params.id})
+                    })     
+                    res.json({ 'status': 'OK','media':media })
                 })
             }
         }
     })
+    
 })
 
 router.post('/:id/upvote', jsonParser, function (req, res) {

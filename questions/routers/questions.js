@@ -76,6 +76,7 @@ router.get('/:id', jsonParser, function (req, res) {
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
+            console.log("getQuestion "+ req.params.id)
             var question = result[0]
             if (req.body.current_user == null) { //count by IP
                 req.body.current_user = req.connection.remoteAddress

@@ -40,7 +40,6 @@ router.post('/add', jsonParser, function (req, res) {
                 data['upvoters'] = []
                 data['downvoters'] = []
                 db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
-                    console.log(result.length)
                     if (result == null && req.body.media.length != 0) {
                         return res.json({ 'status': 'error', 'error': 'media error' })
                     } else {
@@ -48,20 +47,16 @@ router.post('/add', jsonParser, function (req, res) {
                         for(i in result){
                             m.push(result[i].id)
                         }
-                        console.log(m)
                         correct = true
                         for (i in req.body.media) {
                             if (!m.includes(req.body.media[i])) {
                                 correct = false
-                                console.log("h")
                             }
                         }
                         if (!correct) {
                             return res.json({ 'status': 'error', 'error': 'media error' })
                         } else {
-                            console.log("123")
                             for (i in req.body.media){
-                                console.log(req.body.media[i])
                                 db.collection("medias").updateOne({"id":req.body.media[i]},{$set:{"used":true}})
                             }
                             db.collection('questions').insertOne(data)
@@ -141,18 +136,24 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
             if (result == null && req.body.media.length != 0) {
                 return res.json({ 'status': 'error', 'error': 'media error' })
             } else {
+                m = []
+                for(i in result){
+                    m.push(result[i].id)
+                }
                 correct = true
-                for (i = 0; i < req.body.media; i++) {
-                    if (!result.includes(req.body.media[i])) {
+                for (i in req.body.media) {
+                    if (!m.includes(req.body.media[i])) {
                         correct = false
                     }
                 }
                 if (!correct) {
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
+                    for (i in req.body.media){
+                        db.collection("medias").updateOne({"id":req.body.media[i]},{$set:{"used":true}})
+                    }
                     db.collection('answers').insertOne(answer, function (err, res) {
                         if (err) console.log(err)
-
                     })
                     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
                         if (result.length != 1) {
@@ -175,6 +176,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                             res.json({ 'status': 'OK', 'id': id })
                         }
                     })
+                    
                 }
             }
         })

@@ -222,7 +222,6 @@ router.delete('/:id', jsonParser, function (req, res) {
                         return res.json({ 'status': 'error', 'error': 'delete failed' })
                     }
                     db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, r) {
-                        console.log(r)
                         if (r != null) {
                             if (r.length != 0) {
                                 for (j in r) {
@@ -232,9 +231,9 @@ router.delete('/:id', jsonParser, function (req, res) {
                                     }
                                 }
                                 db.collection('answers').deleteMany({ 'questionID': req.params.id })
-                                res.json({ 'status': 'OK', 'media': media })
                             }
                         }
+                        res.json({ 'status': 'OK', 'media': media })
                     })
                 })
             }

@@ -40,12 +40,18 @@ router.post('/add', jsonParser, function (req, res) {
                 data['upvoters'] = []
                 data['downvoters'] = []
                 db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
+                    console.log(result.length)
                     if (result == null && req.body.media.length != 0) {
                         return res.json({ 'status': 'error', 'error': 'media error' })
                     } else {
+                        m = []
+                        for(i in result){
+                            m.append(result[i].id)
+                        }
+                        console.log(m)
                         correct = true
                         for (i = 0; i < req.body.media; i++) {
-                            if (!result.includes(req.body.media[i])) {
+                            if (!m.includes(req.body.media[i])) {
                                 correct = false
                             }
                         }
@@ -129,15 +135,12 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['voters'] = {}
         answer['questionID'] = req.params.id
         db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
-            console.log(result.length)
             if (result == null && req.body.media.length != 0) {
                 return res.json({ 'status': 'error', 'error': 'media error' })
             } else {
                 correct = true
-                console.log(result)
                 for (i = 0; i < req.body.media; i++) {
                     if (!result.includes(req.body.media[i])) {
-                        console.log(req.body.media[i])
                         correct = false
                     }
                 }

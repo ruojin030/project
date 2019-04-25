@@ -11,14 +11,15 @@ router.get('/', function (req, res) {
 });
 router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
+    req.body.current_user = "FAKE"
     //console.log(req)
-    if (req.body.current_user == null) {
+    /* if (req.body.current_user == null) {
         return res.json({ 'status': 'error', 'error': 'user not login' })
-    } else {
-        db.collection('users').find({ 'username': req.body.current_user }).toArray(function (err, result) {
+    } else { */
+        /* db.collection('users').find({ 'username': req.body.current_user }).toArray(function (err, result) {
             if (result.length != 1) {
                 return res.json({ 'status': 'error', 'error': 'user not match' })
-            } else {
+            } else { */
                 if (req.body.title == null || req.body.body == null || req.body.tags == null) {
                     return res.json({ 'status': 'error', 'error': 'wrong request type' })
                 }
@@ -37,10 +38,12 @@ router.post('/add', jsonParser, function (req, res) {
                 data['upvoters'] = []
                 data['downvoters'] = []
                 db.collection('questions').find({'media':{$in:req.body.media}}).toArray(function(err,result){
+                    console.log(result)
                     if(result!= null){
                         return res.json({ 'status': 'error', 'error': 'media in questions' })
                     }else{
                         db.collection('answers').find({'media':{$in:req.body.media}}).toArray(function(err,result){
+                            console.log(result)
                             if(result!= null){
                                 return res.json({ 'status': 'error', 'error': 'media in answer' })
                             }
@@ -51,8 +54,8 @@ router.post('/add', jsonParser, function (req, res) {
                         })
                     }
                 })  
-            }
-        })
+            //}
+        //})
     }
 });
 

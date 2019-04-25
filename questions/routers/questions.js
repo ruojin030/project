@@ -214,7 +214,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                 return res.json({ 'status': 'error','error':'not poster' })
             } else {
                 for (i in result[0].media) {
-                    media.append(result[0].media[i])
+                    media.push(result[0].media[i])
                 }
                 db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
                     if (err) {
@@ -223,7 +223,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                     }
                     db.collection('answers').find({ 'questionID': req.params.id }, function (err, result) {
                         for (i in result[0].media) {
-                            media.append(result[0].media[i])
+                            media.push(result[0].media[i])
                         }
                         db.collection('answers').deleteOne({ 'questionID': req.params.id })
                     })

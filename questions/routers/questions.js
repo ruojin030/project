@@ -221,24 +221,25 @@ router.delete('/:id', jsonParser, function (req, res) {
                         res.status(403)
                         return res.json({ 'status': 'error','error':'delete failed' })
                     }
-                    db.collection('answers').find({ 'questionID': req.params.id }, function (err, r) {
+                    db.collection('answers').find({ 'questionID': req.params.id }.toArray( function (err, r) {
                         console.log(r)
-                        if(r!= null){
-                        if(r.length != 0){
-                            for(j in r){
-                                console.log(r[j])
-                                for (i in r[j].media) {
-                                    media.push(r[j].media[i])
+                        if(r != null){
+                            if(r.length != 0){
+                                for(j in r){
+                                    console.log(r[j])
+                                    for (i in r[j].media) {
+                                        media.push(r[j].media[i])
+                                    }
                                 }
+                                db.collection('answers').deleteMany({ 'questionID': req.params.id })
+                                res.json({ 'status': 'OK', 'media': media })
                             }
-                            db.collection('answers').deleteMany({ 'questionID': req.params.id })
-                        }}
-                    })
-                    res.json({ 'status': 'OK', 'media': media })
-                })
-            }
+                        }
+                    })    
+                )
+            })
         }
-    })
+    }
 })
 
 router.post('/:id/upvote', jsonParser, function (req, res) {

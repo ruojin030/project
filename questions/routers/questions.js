@@ -15,7 +15,6 @@ router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
     //console.log(req)
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
-        console.log(req.cookies.session)
         res.status(403)
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {
@@ -53,7 +52,7 @@ router.post('/add', jsonParser, function (req, res) {
                 db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
                     if (result == null && req.body.media.length != 0) {
                         res.status(404)
-                        console.log("media has been used ")
+                        console.log("no media can be add")
                         return res.json({ 'status': 'error', 'error': 'media error' })
                     } else {
                         m = []
@@ -64,11 +63,11 @@ router.post('/add', jsonParser, function (req, res) {
                         for (i in req.body.media) {
                             if (!m.includes(req.body.media[i])) {
                                 correct = false
+                                console.log("cannot find media with id "+req.body.media[i])
                             }
                         }
                         if (!correct) {
                             res.status(404)
-                            console.log("media id error")
                             return res.json({ 'status': 'error', 'error': 'media error' })
                         } else {
                             for (i in req.body.media) {
@@ -105,7 +104,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 answers.push(question.answers[i])
             }
             if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) { //count by IP
-                console.log("use ip: " + req.headers['x-forwarded-for']+ " QID is "+ req.params.id)
+                console.log("not login use ip: " + req.headers['x-forwarded-for']+ " QID is "+ req.params.id)
                 if (!views.includes(req.headers['x-forwarded-for'])) {
                     console.log("ip not included")
                     views.push(req.headers['x-forwarded-for'])
@@ -147,6 +146,7 @@ router.get('/:id', jsonParser, function (req, res) {
 
 
 router.post('/:id/answers/add', jsonParser, function (req, res) {
+    console.log("add answers")
     var db = req.app.locals.db
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(404)
@@ -183,11 +183,11 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                 for (i in req.body.media) {
                     if (!m.includes(req.body.media[i])) {
                         correct = false
+                        console.log("cannot find media with id "+req.body.media[i])
                     }
                 }
                 if (!correct) {
                     res.status(404)
-                    console.log("media not match")
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
                     for (i in req.body.media) {
@@ -230,7 +230,7 @@ router.get('/:id/answers', function (req, res) {
     db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, result) {
         if (err) console.log(err);
         else {
-            console.log("get answers")
+            console.log("get answers of "+req.params.id)
             return res.json({ 'status': 'OK', 'answers': result })
         }
     })
@@ -251,7 +251,7 @@ router.delete('/:id', jsonParser, function (req, res) {
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.sendStatus(403)
-            console.log("id not found")
+            console.log(req.params.id+" not found")
             return res.json({ 'status': 'error', 'error': 'id wrong' })
         } else {
             var question = result[0]

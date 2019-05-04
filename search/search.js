@@ -19,7 +19,7 @@ app.post('/search', jsonParser, function (req, res) {
     var accepted = req.body.accepted
     var q = req.body.q
 
-    console.log("timestamps " + req.body.timestamp + "\t limit:" + req.body.limit + "\t accepted:" + req.body.accepted + "\t q:" + req.body.q)
+    console.log("timestamps:" + req.body.timestamp + "\t limit:" + req.body.limit + "\t accepted:" + req.body.accepted + "\t q:" + req.body.q)
     if (req.body.timestamp == null) {
         req.body.timestamp = Date.now() / 1000 | 0
     }

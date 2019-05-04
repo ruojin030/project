@@ -93,7 +93,6 @@ router.get('/:id', jsonParser, function (req, res) {
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
-            console.log(req.cookies.session.current_user + " getQuestion " + req.params.id)
             var question = result[0]
             var views = []
             //console.log(question.views)
@@ -116,6 +115,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 }
             }
             else {
+                console.log(req.cookies.session.current_user + " getQuestion " + req.params.id)
                 if (!views.includes(req.cookies.session.current_user)) {
                     console.log(req.cookies.session.current_user + " not included, views " + views)
                     views.push(req.cookies.session.current_user)

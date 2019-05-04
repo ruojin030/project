@@ -127,6 +127,7 @@ router.get('/:id', jsonParser, function (req, res) {
             }
 
             question['view_count'] = views.length
+            question['views'] = views
             delete question._id
             delete question.answers
             question['answer_count'] = answers.length

@@ -67,7 +67,7 @@ router.post('/add', jsonParser, function (req, res) {
                         }
                         if (!correct) {
                             res.status(404)
-                            conosole.log("media id error")
+                            console.log("media id error")
                             return res.json({ 'status': 'error', 'error': 'media error' })
                         } else {
                             for (i in req.body.media) {
@@ -89,13 +89,12 @@ router.get('/:id', jsonParser, function (req, res) {
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(404)
-            console.log()
+            console.log("found result number is "+ result.length)
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
             console.log(req.cookies.session.current_user = undefined + " getQuestion " + req.params.id)
             var question = result[0]
-
             var views = []
             //console.log(question.views)
             for (var i in question.views) {

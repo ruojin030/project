@@ -14,6 +14,7 @@ router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
     //console.log(req)
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
+        console.log(req.cookies.session)
         res.status(403)
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {

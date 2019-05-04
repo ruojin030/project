@@ -2,15 +2,13 @@ var express = require('express');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.39:27017';
-const cookieSession = require('cookie-session');
 var cookieParser = require('cookie-parser');
 
 const port = 3000
 
-app.use(cookieSession({
-    name: 'session',
-    keys: ['lalala'],
-  }))
+
+app.use(cookieParser());
+
 
 var questions = require("./routers/questions")
 var answers = require("./routers/answers")
@@ -19,7 +17,6 @@ var reset = require("./routers/reset")
 app.use('/questions',questions)
 app.use('/answers',answers)
 app.use('/reset',reset)
-app.use(cookieParser());
 app.get('/',function(req, res){
     res.send("hello")
 })

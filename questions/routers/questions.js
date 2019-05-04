@@ -5,6 +5,7 @@ var router = express.Router();
 var jsonParser = bodyParser.json()
 var path = require('path');
 var cookieParser = require('cookie-parser');
+var request = require("request")
 
 
 router.get('/', function (req, res) {
@@ -85,7 +86,6 @@ router.post('/add', jsonParser, function (req, res) {
 });
 
 router.get('/:id', jsonParser, function (req, res) {
-    console.log(req.headers)
     var db = req.app.locals.db
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
@@ -105,7 +105,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 answers.push(question.answers[i])
             }
             if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) { //count by IP
-                console.log("use ip:" + req.headers['x-forwarded-for'])
+                console.log("use ip: " + req.headers['x-forwarded-for']+ " QID is "+ req.params.id)
                 if (!views.includes(req.headers['x-forwarded-for'])) {
                     console.log("ip not included")
                     views.push(req.headers['x-forwarded-for'])
@@ -116,6 +116,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 }
             }
             else {
+                console.log(req.cookies.session.current_user+" get question "+req.params.id)
                 //console.log(req.cookies.session.current_user + " getQuestion " + req.params.id)
                 if (!views.includes(req.cookies.session.current_user)) {
                     console.log(req.cookies.session.current_user + " not included, views " + views)
@@ -249,24 +250,22 @@ router.delete('/:id', jsonParser, function (req, res) {
     //console.log(req.cookies.session.current_user)
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
-            res.status(403)
+            res.sendStatus(403)
             console.log("id not found")
             return res.json({ 'status': 'error', 'error': 'id wrong' })
         } else {
             var question = result[0]
             if (question.user != req.cookies.session.current_user) {
-                res.status(403)
                 console.log("poster wrong")
-                return res.json({ 'status': 'error', 'error': 'not poster' })
+                return res.sendStatus(403)
             } else {
                 for (i in result[0].media) {
                     media.push(result[0].media[i])
                 }
                 db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
                     if (err) {
-                        res.status(403)
                         console.log("delete failded")
-                        return res.json({ 'status': 'error', 'error': 'delete failed' })
+                        res.sendStatus(403)                
                     }
                     db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, r) {
                         if (r != null) {
@@ -281,7 +280,22 @@ router.delete('/:id', jsonParser, function (req, res) {
                             }
                         }
                         console.log(req.params.id+" deleted success")
-                        res.json({ 'status': 'OK', 'media': media })
+                        request({  
+                            url: 'http://192.168.122.35:3000/deletemedia',
+                            method: 'POST',
+                            json:{'media':media}
+                        }, function(err,resp,body1){
+                            if(err) {
+                                return res.sendStatus(404)
+                            }
+                            else {
+                                if(body1.status == 'error'){
+                                    return res.sendStatus(404)
+                                }else{
+                                    return res.sendStatus(200)
+                                }
+                            }
+                        });
                     })
                 })
             }

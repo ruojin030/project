@@ -13,11 +13,11 @@ router.get('/', function (req, res) {
 router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
     //console.log(req)
-    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined) {
+    if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(403)
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {
-        db.collection('users').find({ 'username': req.body.current_user }).toArray(function (err, result) {
+        db.collection('users').find({ 'username': req.cookies.session.current_user }).toArray(function (err, result) {
             if (result.length != 1) {
                 res.status(404)
                 return res.json({ 'status': 'error', 'error': 'user not match' })
@@ -30,11 +30,11 @@ router.post('/add', jsonParser, function (req, res) {
                 if (req.body.media == null) {
                     req.body.media = []
                     data['has_media'] = false
-                }else{
+                } else {
                     data['has_media'] = true
                 }
                 data['id'] = uniqid();
-                data['user'] = req.body.current_user
+                data['user'] = req.cookies.session.current_user
                 data['title'] = req.body.title
                 data['body'] = req.body.body
                 data['score'] = 0
@@ -46,7 +46,7 @@ router.post('/add', jsonParser, function (req, res) {
                 data['accepted_answer_id'] = null
                 data['upvoters'] = []
                 data['downvoters'] = []
-                db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
+                db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
                     if (result == null && req.body.media.length != 0) {
                         res.status(404)
                         return res.json({ 'status': 'error', 'error': 'media error' })
@@ -83,16 +83,13 @@ router.get('/:id', jsonParser, function (req, res) {
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(404)
+            console.log()
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
-            if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined) { //count by IP
-                console.log("use ip")
-                req.cookies.session.current_user = req.connection.remoteAddress
-            }
-            console.log(req.cookies.session.current_user = undefined+" getQuestion "+ req.params.id)
+            console.log(req.cookies.session.current_user = undefined + " getQuestion " + req.params.id)
             var question = result[0]
-            
+
             var views = []
             //console.log(question.views)
             for (var i in question.views) {
@@ -102,13 +99,26 @@ router.get('/:id', jsonParser, function (req, res) {
             for (var i in question.answers) {
                 answers.push(question.answers[i])
             }
-            if (!views.includes(req.cookies.session.current_user)) {
-                console.log(req.cookies.session.current_user+ " not included, views " + views)
-                views.push(req.cookies.session.current_user)
-                db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
-                    if (err) throw console.log(err);
-                    //console.log("1 views updated");
-                });
+            if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) { //count by IP
+                console.log("use ip:" + req.connection.remoteAddress)
+                if (!views.includes(req.connection.remoteAddress)) {
+                    console.log("ip not included")
+                    views.push(req.connection.remoteAddress)
+                    db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
+                        if (err) throw console.log(err);
+                        //console.log("1 views updated");
+                    });
+                }
+            }
+            else {
+                if (!views.includes(req.cookies.session.current_user)) {
+                    console.log(req.cookies.session.current_user + " not included, views " + views)
+                    views.push(req.cookies.session.current_user)
+                    db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
+                        if (err) throw console.log(err);
+                        //console.log("1 views updated");
+                    });
+                }
             }
 
             question['view_count'] = views.length
@@ -117,7 +127,7 @@ router.get('/:id', jsonParser, function (req, res) {
             question['answer_count'] = answers.length
             db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                 if (err) console.log(err)
-                if(result[0].reputation<1){
+                if (result[0].reputation < 1) {
                     result[0].reputation = 1
                 }
                 question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
@@ -131,7 +141,7 @@ router.get('/:id', jsonParser, function (req, res) {
 
 router.post('/:id/answers/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined){
+    if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(404)
         return res.json({ 'status': 'error', 'error': 'you have to login to answer' })
     } else {
@@ -140,18 +150,18 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         if (req.body.media == null) {
             req.body.media = []
             answer['has_media'] = false
-        }else{
+        } else {
             answer['has_media'] = true
         }
         answer['id'] = id
         answer['score'] = 0
-        answer['user'] = req.body.current_user
+        answer['user'] = req.cookies.session.current_user
         answer['is_accepted'] = false
         answer['timestamp'] = Date.now() / 1000
         answer['media'] = req.body.media
         answer['voters'] = {}
         answer['questionID'] = req.params.id
-        db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
+        db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
             if (result == null && req.body.media.length != 0) {
                 res.status(404)
                 return res.json({ 'status': 'error', 'error': 'media error' })
@@ -218,19 +228,19 @@ router.delete('/:id', jsonParser, function (req, res) {
     //need to delete the media
     media = []
     var db = req.app.locals.db
-    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined) {
+    if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(403)
         return res.json({ 'status': 'error', 'error': 'not login' })
 
     }
-    //console.log(req.body.current_user)
+    //console.log(req.cookies.session.current_user)
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(403)
             return res.json({ 'status': 'error', 'error': 'id wrong' })
         } else {
             var question = result[0]
-            if (question.user != req.body.current_user) {
+            if (question.user != req.cookies.session.current_user) {
                 res.status(403)
                 return res.json({ 'status': 'error', 'error': 'not poster' })
             } else {
@@ -265,7 +275,7 @@ router.delete('/:id', jsonParser, function (req, res) {
 router.post('/:id/upvote', jsonParser, function (req, res) {
     var db = req.app.locals.db
 
-    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined) {
+    if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(404)
         return res.json({ 'status': 'error', 'error': 'you have to login to vote' })
     }
@@ -284,14 +294,14 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
             var hasDownVote = false
             var changed = 0
             for (var i in result[0].upvoters) {
-                if (result[0].upvoters[i] == req.body.current_user) {
+                if (result[0].upvoters[i] == req.cookies.session.current_user) {
                     hasUpVote = true
                 } else {
                     upvoters.push(result[0].upvoters[i])
                 }
             }
             for (var i in result[0].downvoters) {
-                if (result[0].downvoters[i] == req.body.current_user) {
+                if (result[0].downvoters[i] == req.cookies.session.current_user) {
                     hasDownVote = true
                 } else {
                     downvoters.push(result[0].downvoters[i])
@@ -300,26 +310,26 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
             //console.log(req.body.upvote)
             if (req.body.upvote && hasUpVote && !hasDownVote) { // undo upvote
                 changed--
-                console.log(req.params.id+" undo upvote")
+                console.log(req.params.id + " undo upvote")
             } else if (req.body.upvote && !hasUpVote && !hasDownVote) { // upvote
                 changed++
-                upvoters.push(req.body.current_user)
-                console.log(req.params.id+" upvote")
+                upvoters.push(req.cookies.session.current_user)
+                console.log(req.params.id + " upvote")
             } else if (!req.body.upvote && hasDownVote && !hasUpVote) { //undo downvote
                 changed++
-                console.log(req.params.id+"undo downvote")
+                console.log(req.params.id + "undo downvote")
             } else if (!req.body.upvote && !hasDownVote && !hasUpVote) { //downvote
                 changed--
-                downvoters.push(req.body.current_user)
-                console.log(req.params.id+"downvote")
+                downvoters.push(req.cookies.session.current_user)
+                console.log(req.params.id + "downvote")
             } else if (req.body.upvote && hasDownVote && !hasUpVote) { //change downvote to upvote
                 changed += 2
-                upvoters.push(req.body.current_user)
-                console.log(req.params.id+"change downvote to upvote")
+                upvoters.push(req.cookies.session.current_user)
+                console.log(req.params.id + "change downvote to upvote")
             } else if (!req.body.upvote && hasUpVote && !hasDownVote) { //change upvote to downvote
                 changed -= 2
-                downvoters.push(req.body.current_user)
-                console.log(req.params.id+"change upvote to downvote")
+                downvoters.push(req.cookies.session.current_user)
+                console.log(req.params.id + "change upvote to downvote")
             }
             var username = result[0].user
             console.log(result[0].score)
@@ -327,10 +337,10 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
                 if (err) console.log(err);
                 //console.log(req.params.id + " vote updated");
             });
-             db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
+            db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
                 if (err) console.log(err);
-                console.log(username + " reputation updated "+changed)
-            }) 
+                console.log(username + " reputation updated " + changed)
+            })
             /* db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
                 if (err) console.log(err);
                 //console.log(username + " reputation <=1")

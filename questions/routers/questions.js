@@ -85,6 +85,7 @@ router.post('/add', jsonParser, function (req, res) {
 });
 
 router.get('/:id', jsonParser, function (req, res) {
+    console.log(req)
     var db = req.app.locals.db
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
@@ -115,7 +116,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 }
             }
             else {
-                console.log(req.cookies.session.current_user + " getQuestion " + req.params.id)
+                //console.log(req.cookies.session.current_user + " getQuestion " + req.params.id)
                 if (!views.includes(req.cookies.session.current_user)) {
                     console.log(req.cookies.session.current_user + " not included, views " + views)
                     views.push(req.cookies.session.current_user)

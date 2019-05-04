@@ -93,7 +93,7 @@ router.get('/:id', jsonParser, function (req, res) {
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
-            console.log(req.cookies.session.current_user = undefined + " getQuestion " + req.params.id)
+            console.log(req.cookies.session.current_user + " getQuestion " + req.params.id)
             var question = result[0]
             var views = []
             //console.log(question.views)

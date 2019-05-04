@@ -85,7 +85,7 @@ router.post('/add', jsonParser, function (req, res) {
 });
 
 router.get('/:id', jsonParser, function (req, res) {
-    console.log(req)
+    console.log(req.headers)
     var db = req.app.locals.db
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {

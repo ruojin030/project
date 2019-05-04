@@ -20,10 +20,12 @@ router.post('/add', jsonParser, function (req, res) {
     } else {
         db.collection('users').find({ 'username': req.cookies.session.current_user }).toArray(function (err, result) {
             if (result.length != 1) {
+                console.log("user not match found "+result.length)
                 res.status(404)
                 return res.json({ 'status': 'error', 'error': 'user not match' })
             } else {
                 if (req.body.title == null || req.body.body == null || req.body.tags == null) {
+                    console.log("body miss part")
                     res.status(404)
                     return res.json({ 'status': 'error', 'error': 'wrong request type' })
                 }
@@ -50,6 +52,7 @@ router.post('/add', jsonParser, function (req, res) {
                 db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
                     if (result == null && req.body.media.length != 0) {
                         res.status(404)
+                        console.log("media has been used ")
                         return res.json({ 'status': 'error', 'error': 'media error' })
                     } else {
                         m = []
@@ -64,12 +67,14 @@ router.post('/add', jsonParser, function (req, res) {
                         }
                         if (!correct) {
                             res.status(404)
+                            conosole.log("media id error")
                             return res.json({ 'status': 'error', 'error': 'media error' })
                         } else {
                             for (i in req.body.media) {
                                 db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
                             }
                             db.collection('questions').insertOne(data)
+                            console.log(data['id'] +" add success by "+ req.cookies.session.current_user)
                             res.json({ 'status': "OK", 'id': data.id })
                         }
                     }

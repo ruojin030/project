@@ -4,6 +4,7 @@ var uniqid = require("uniqid");
 var router = express.Router();
 var jsonParser = bodyParser.json()
 var path = require('path');
+var cookieParser = require('cookie-parser');
 
 
 router.get('/', function (req, res) {
@@ -12,14 +13,17 @@ router.get('/', function (req, res) {
 router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
     //console.log(req)
-    if (req.body.current_user == null) {
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined) {
+        res.status(403)
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {
         db.collection('users').find({ 'username': req.body.current_user }).toArray(function (err, result) {
             if (result.length != 1) {
+                res.status(404)
                 return res.json({ 'status': 'error', 'error': 'user not match' })
             } else {
                 if (req.body.title == null || req.body.body == null || req.body.tags == null) {
+                    res.status(404)
                     return res.json({ 'status': 'error', 'error': 'wrong request type' })
                 }
                 var data = {}
@@ -44,6 +48,7 @@ router.post('/add', jsonParser, function (req, res) {
                 data['downvoters'] = []
                 db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
                     if (result == null && req.body.media.length != 0) {
+                        res.status(404)
                         return res.json({ 'status': 'error', 'error': 'media error' })
                     } else {
                         m = []
@@ -57,6 +62,7 @@ router.post('/add', jsonParser, function (req, res) {
                             }
                         }
                         if (!correct) {
+                            res.status(404)
                             return res.json({ 'status': 'error', 'error': 'media error' })
                         } else {
                             for (i in req.body.media) {
@@ -76,6 +82,7 @@ router.get('/:id', jsonParser, function (req, res) {
     var db = req.app.locals.db
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
+            res.status(404)
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
@@ -123,7 +130,8 @@ router.get('/:id', jsonParser, function (req, res) {
 
 router.post('/:id/answers/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    if (req.body.current_user == null) {
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined){
+        res.status(404)
         return res.json({ 'status': 'error', 'error': 'you have to login to answer' })
     } else {
         var answer = req.body
@@ -144,6 +152,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['questionID'] = req.params.id
         db.collection("medias").find({ "poster": req.body.current_user, "used": false }).toArray(function (err, result) {
             if (result == null && req.body.media.length != 0) {
+                res.status(404)
                 return res.json({ 'status': 'error', 'error': 'media error' })
             } else {
                 m = []
@@ -157,6 +166,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                     }
                 }
                 if (!correct) {
+                    res.status(404)
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
                     for (i in req.body.media) {
@@ -167,6 +177,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                     })
                     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
                         if (result.length != 1) {
+                            res.status(404)
                             return res.json({ 'status': 'error', 'error': 'question not found' })
                         }
                         else {
@@ -186,7 +197,6 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                             res.json({ 'status': 'OK', 'id': id })
                         }
                     })
-
                 }
             }
         })
@@ -207,7 +217,7 @@ router.delete('/:id', jsonParser, function (req, res) {
     //need to delete the media
     media = []
     var db = req.app.locals.db
-    if (req.body.current_user == null) {
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined) {
         res.status(403)
         return res.json({ 'status': 'error', 'error': 'not login' })
 
@@ -254,7 +264,8 @@ router.delete('/:id', jsonParser, function (req, res) {
 router.post('/:id/upvote', jsonParser, function (req, res) {
     var db = req.app.locals.db
 
-    if (req.body.current_user == null) {
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined) {
+        res.status(404)
         return res.json({ 'status': 'error', 'error': 'you have to login to vote' })
     }
     if (req.body.upvote == null) {
@@ -262,6 +273,7 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
     }
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
+            res.status(404)
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {

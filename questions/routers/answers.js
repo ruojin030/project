@@ -6,7 +6,7 @@ var jsonParser = bodyParser.json()
 
 router.post('/:id/upvote',jsonParser,function(req,res){
     var db = req.app.locals.db
-    if(req.body.current_user == null){
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined){
         return res.json({'status':'error','error':'user not login'})
     }
     if(req.body.upvote == null){
@@ -63,7 +63,7 @@ router.post('/:id/upvote',jsonParser,function(req,res){
 })
 
 router.post('/:id/accept',jsonParser,function(req,res){
-    if(req.body.current_user == null){
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined){
         return req.json({'status':'error','error':'not login'})
     }
     db.collection('answers').find({'id':req.params.id}).toArray(function(err,result){

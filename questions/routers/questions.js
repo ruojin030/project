@@ -13,7 +13,7 @@ router.get('/', function (req, res) {
 router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
     //console.log(req)
-    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined) {
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined) {
         res.status(403)
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {
@@ -86,12 +86,13 @@ router.get('/:id', jsonParser, function (req, res) {
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
-            console.log(req.body.current_user+" getQuestion "+ req.params.id)
-            var question = result[0]
-            if (req.body.current_user == null) { //count by IP
+            if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined) { //count by IP
                 console.log("use ip")
-                req.body.current_user = req.connection.remoteAddress
+                req.cookies.session.current_user = req.connection.remoteAddress
             }
+            console.log(req.cookies.session.current_user = undefined+" getQuestion "+ req.params.id)
+            var question = result[0]
+            
             var views = []
             //console.log(question.views)
             for (var i in question.views) {
@@ -101,9 +102,9 @@ router.get('/:id', jsonParser, function (req, res) {
             for (var i in question.answers) {
                 answers.push(question.answers[i])
             }
-            if (!views.includes(req.body.current_user)) {
-                console.log(req.body.current_user+ " not included, views " + views)
-                views.push(req.body.current_user)
+            if (!views.includes(req.cookies.session.current_user)) {
+                console.log(req.cookies.session.current_user+ " not included, views " + views)
+                views.push(req.cookies.session.current_user)
                 db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
                     if (err) throw console.log(err);
                     //console.log("1 views updated");
@@ -130,7 +131,7 @@ router.get('/:id', jsonParser, function (req, res) {
 
 router.post('/:id/answers/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined){
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined){
         res.status(404)
         return res.json({ 'status': 'error', 'error': 'you have to login to answer' })
     } else {
@@ -177,7 +178,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                     })
                     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
                         if (result.length != 1) {
-                            res.status(404)
+                            res.status(s404)
                             return res.json({ 'status': 'error', 'error': 'question not found' })
                         }
                         else {
@@ -217,7 +218,7 @@ router.delete('/:id', jsonParser, function (req, res) {
     //need to delete the media
     media = []
     var db = req.app.locals.db
-    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined) {
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined) {
         res.status(403)
         return res.json({ 'status': 'error', 'error': 'not login' })
 
@@ -264,7 +265,7 @@ router.delete('/:id', jsonParser, function (req, res) {
 router.post('/:id/upvote', jsonParser, function (req, res) {
     var db = req.app.locals.db
 
-    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_users == undefined) {
+    if (req.cookies == undefined || req.cookies.session == undefined||req.cookies.session.current_user == undefined) {
         res.status(404)
         return res.json({ 'status': 'error', 'error': 'you have to login to vote' })
     }

@@ -105,10 +105,10 @@ router.get('/:id', jsonParser, function (req, res) {
                 answers.push(question.answers[i])
             }
             if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) { //count by IP
-                console.log("use ip:" + req.connection.remoteAddress)
-                if (!views.includes(req.connection.remoteAddress)) {
+                console.log("use ip:" + req.headers['x-forwarded-for'])
+                if (!views.includes(req.headers['x-forwarded-for'])) {
                     console.log("ip not included")
-                    views.push(req.connection.remoteAddress)
+                    views.push(req.headers['x-forwarded-for'])
                     db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'views': views } }, function (err, res) {
                         if (err) throw console.log(err);
                         //console.log("1 views updated");

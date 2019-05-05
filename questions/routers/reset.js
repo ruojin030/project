@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();  
 router.get('/',function(req,res){
-    console.log("you success")
+    console.log("reset success")
     var db = req.app.locals.db
     db.collection('answers').remove({})
     db.collection('questions').remove({})

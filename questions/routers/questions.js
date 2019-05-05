@@ -16,11 +16,12 @@ router.post('/add', jsonParser, function (req, res) {
     //console.log(req)
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(403)
+        console.log('user not login')
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {
         db.collection('users').find({ 'username': req.cookies.session.current_user }).toArray(function (err, result) {
             if (result.length != 1) {
-                console.log("user not match found "+result.length)
+                console.log(req.cookies.session.current_user+' not in db')
                 res.status(404)
                 return res.json({ 'status': 'error', 'error': 'user not match' })
             } else {
@@ -63,7 +64,7 @@ router.post('/add', jsonParser, function (req, res) {
                         for (i in req.body.media) {
                             if (!m.includes(req.body.media[i])) {
                                 correct = false
-                                console.log("cannot find media with id "+req.body.media[i])
+                                console.log("media "+req.body.media[i]+" been used")
                             }
                         }
                         if (!correct) {
@@ -89,7 +90,7 @@ router.get('/:id', jsonParser, function (req, res) {
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(404)
-            console.log("found result number is "+ result.length)
+            console.log('cannot found question with id '+req.params.id)
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
@@ -199,20 +200,21 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
                         if (result.length != 1) {
                             res.status(404)
-                            console.log("question not found")
+                            console.log("question "+req.params.id +"not found")
                             return res.json({ 'status': 'error', 'error': 'question not found' })
                         }
                         else {
-                            var question = result[0]
+                            /*var question = result[0]
                             var answers = []
                             for (var i in question.answers) {
                                 answers.push(question.answers[i])
                             }
-                            answers.push(id)
-                            db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
+                            answers.push(id)*/
+                            db.collection('questions').updateOne({'id':req.params.id},{$push:{'answers':id}})
+                            /*db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
                                 if (err) throw err;
                                 //console.log("question:"+req.params.id+"add one answer");
-                            });
+                            });*/
                             for (i = 0; i < req.body.media; i++) {
                                 db.collection("medias").updateOne({ "id": req.body.media[i] }, { "used": true })
                             }
@@ -290,6 +292,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                             }
                             else {
                                 if(body1.status == 'error'){
+                                    console.log('media delete error')
                                     return res.sendStatus(404)
                                 }else{
                                     return res.sendStatus(200)
@@ -316,7 +319,7 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
     }
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
-            console.log("question not found")
+            console.log(req.params.id+ " question not found")
             res.status(404)
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }

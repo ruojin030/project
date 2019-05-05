@@ -13,7 +13,6 @@ router.get('/', function (req, res) {
 });
 router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    var ec = req.app.locals.ec
     //console.log(req)
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(403)
@@ -76,7 +75,6 @@ router.post('/add', jsonParser, function (req, res) {
                                 db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
                             }
                             db.collection('questions').insertOne(data)
-                            ec.bulk(data)
                             console.log(data['id'] +" add success by "+ req.cookies.session.current_user)
                             res.json({ 'status': "OK", 'id': data.id })
                         }

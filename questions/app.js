@@ -21,11 +21,6 @@ app.get('/',function(req, res){
     res.send("hello")
 })
 
-var client = new elasticsearch.Client({
-  host: '130.245.171.61:9200',
-  log: 'trace'
-});
-app.locals.ec = client;
 
 MongoClient.connect(mongo_address, (err, client) => {
     // ... start the server

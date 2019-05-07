@@ -1,5 +1,6 @@
 var express = require('express');
 const app = express()
+const elasticsearch = require('elasticsearch');
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.39:27017';
 var bodyParser = require('body-parser');
@@ -7,6 +8,8 @@ var jsonParser = bodyParser.json()
 var sleep = require('sleep');
 
 const port = 3001
+
+
 
 app.get('/', function (req, res) {
     res.send("hello!")
@@ -76,6 +79,11 @@ app.post('/search', jsonParser, function (req, res) {
             question['answer_count'] = answers.length
             db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                 if (err) console.log(err)
+                if(result.length!=1){
+                    res.status(404)
+                    console.log("user not found")
+                    return res.json({ 'status': 'error', 'error': 'user not found'})
+                }
                 if(result[0].reputation<1){
                     result[0].reputation = 1
                 }
@@ -88,6 +96,9 @@ app.post('/search', jsonParser, function (req, res) {
     })
 
 })
+
+
+
 
 MongoClient.connect(mongo_address, (err, client) => {
     // ... start the server

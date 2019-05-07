@@ -252,9 +252,8 @@ router.delete('/:id', jsonParser, function (req, res) {
     //console.log(req.cookies.session.current_user)
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
-            res.sendStatus(403)
             console.log(req.params.id+" not found")
-            return res.json({ 'status': 'error', 'error': 'id wrong' })
+            return res.sendStatus(403)     
         } else {
             var question = result[0]
             if (question.user != req.cookies.session.current_user) {

@@ -1,6 +1,5 @@
 var express = require('express');
 const app = express()
-const elasticsearch = require('elasticsearch');
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.39:27017';
 var bodyParser = require('body-parser');
@@ -91,7 +90,6 @@ app.post('/search', jsonParser, function (req, res) {
             })
             questions.push(question)
         }
-
         res.json({ 'status': 'OK', 'questions': questions })
     })
 

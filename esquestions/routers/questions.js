@@ -285,8 +285,9 @@ router.delete('/:id', jsonParser, function (req, res) {
                                         media.push(r[j].media[i])
                                     }
                                 }
-                                db.collection('answers').deleteMany({ 'questionID': req.params.id })
+                                console.log("heere!!!!!")
                                 es.delete({index:esindex,id:req.params.id})
+                                db.collection('answers').deleteMany({ 'questionID': req.params.id })
                             }
                         }
                         console.log(req.params.id+" deleted success")

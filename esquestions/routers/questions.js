@@ -1,11 +1,11 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var uniqid = require("uniqid");
+var express = require('../node_modules/express');
+var bodyParser = require('../node_modules/body-parser');
+var uniqid = require("../node_modules/uniqid");
 var router = express.Router();
 var jsonParser = bodyParser.json()
 var path = require('path');
-var cookieParser = require('cookie-parser');
-var request = require("request")
+var cookieParser = require('../node_modules/cookie-parser');
+var request = require("../node_modules/request")
 
 
 router.get('/', function (req, res) {
@@ -76,7 +76,7 @@ router.post('/add', jsonParser, function (req, res) {
                                 db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
                             }
                             db.collection('questions').insertOne(data)
-                            es.index({index:process.env.ES_INDEX,body:data,"_id":data.id})
+                            es.index({index:process.env.ES_INDEX,body:data,"id":data.id})
                             console.log(data['id'] +" add success by "+ req.cookies.session.current_user)
                             res.json({ 'status': "OK", 'id': data.id })
                         }

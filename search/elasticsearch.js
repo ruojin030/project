@@ -90,6 +90,7 @@ app.post('/search', jsonParser, function (req, res) {
                         console.log("cache!")
                         questions.push(question)
                     }else{
+                        console.log("no cache :(")
                         db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                             if (err) console.log(err)
                             if (result.length != 1) {
@@ -101,7 +102,6 @@ app.post('/search', jsonParser, function (req, res) {
                                 result[0].reputation = 1
                             }
                             question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
-                            console.log("no cache :(")
                             questions.push(question)
                             memcached.set(question.user,{ 'username': result[0].username, 'reputation': result[0].reputation }
                             , 100, function (err) {

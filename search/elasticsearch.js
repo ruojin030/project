@@ -88,8 +88,8 @@ app.post('/search', jsonParser, function (req, res) {
                 memcached.get(question.user,function(err,data){
                     if(err) console.log(err)
                     if(data!=null){
-                        question.user = data
                         console.log("cache!")
+                        question.user = data   
                         questions.push(question)
                     }else{
                         console.log("no cache :(")
@@ -106,7 +106,7 @@ app.post('/search', jsonParser, function (req, res) {
                             question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
                             questions.push(question)
                             memcached.set(question.user,{ 'username': result[0].username, 'reputation': result[0].reputation }
-                            , 100, function (err) {
+                            , 10, function (err) {
                                 if(err) console.log("cache error:"+err)
                                 else console.log("cache "+ question.user+ " success")
                             })

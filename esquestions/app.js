@@ -1,8 +1,9 @@
-var express = require('express');
+var express = require('./node_modules/express');
 const app = express();
-const MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('./node_modules/mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.39:27017';
-var cookieParser = require('cookie-parser');
+var cookieParser = require('./node_modules/cookie-parser');
+var elasticsearch = require('elasticsearch')
 
 const port = 3000
 
@@ -35,7 +36,7 @@ MongoClient.connect(mongo_address, (err, client) => {
     db.collection("questions").createIndex({'title':"text",'body':"text"},{default_language: "none"}  )
   })
 var client = new elasticsearch.Client({
-    host: ES_IP
+    host: process.env.ES_IP
 });
 app.locals.es = client
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

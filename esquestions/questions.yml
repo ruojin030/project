@@ -1,0 +1,17 @@
+---
+- hosts: questions
+  remote_user: ubuntu
+  become: yes
+  tasks:
+  - name: update
+    raw: sudo apt update
+  - name: install nodejs
+    apt:
+      name: nodejs
+  - name: install npm
+    apt:
+      name: npm
+  - name: git clone
+    git:
+      repo: https://github.com/ruojin030/project.git
+      dest: /home/ubuntu/

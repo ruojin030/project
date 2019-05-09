@@ -83,8 +83,6 @@ app.post('/search', jsonParser, function (req, res) {
                 delete question._id
                 delete question.answers
                 question['answer_count'] = answers.length
-                console.log("reach")
-                console.log(question.user)
                 /*  memcached.get(question.user,function(err,data){
                      if(err) console.log(err)
                      console.log(data)
@@ -101,6 +99,7 @@ app.post('/search', jsonParser, function (req, res) {
                         console.log("user not found found "+result.length)
                         return res.json({ 'status': 'error', 'error': 'user not found' })
                     }
+                    console.log(result.length)
                     if (result[0].reputation < 1) {
                         result[0].reputation = 1
                     }

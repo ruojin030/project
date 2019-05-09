@@ -67,6 +67,7 @@ app.post('/search', jsonParser, function (req, res) {
         db.collection('questions').find({ "id": { $in: resultID } }).toArray(function (err, result) {
             if (err) console.log(err);
             var questions = []
+            console.log("mongodb found "+result.length)
             for (var i in result) {
                 var question = result[i]
                 var views = []

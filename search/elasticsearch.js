@@ -39,9 +39,9 @@ app.post('/search', jsonParser, function (req, res) {
     }
     sort_q = {}
     if (req.body.sort_by == null || req.body.sort_by == "score") {
-        sort_q = { "score": "desc" }
+        sort_q =  "score:desc" 
     } else {
-        sort_q = { "timestamp": "desc" }
+        sort_q = "timestamp:desc" 
     }
     if (req.body.accepted) {
         must.push({ exist: { field: accepted_answer_id } })
@@ -62,7 +62,7 @@ app.post('/search', jsonParser, function (req, res) {
         console.log("es found" + hits.length);
         var resultID = []
         for (var i in hits) {
-            resultID.push(hits[i]._source.id);
+            resultID.push(hits[i]._source._id);
         }
         db.collection('questions').find({ "id": { $in: resultID } }).toArray(function (err, result) {
             if (err) console.log(err);

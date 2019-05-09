@@ -2,9 +2,11 @@ var express = require('express');
 const app = express()
 var bodyParser = require('body-parser');
 var Memcached = require('memcached');
+const MongoClient = require('mongodb').MongoClient;
+const mongo_address = 'mongodb://192.168.122.39:27017';
 var jsonParser = bodyParser.json()
 
-
+const port =3001
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
     host: process.env.ES_IP

@@ -287,11 +287,10 @@ router.delete('/:id', jsonParser, function (req, res) {
                                         media.push(r[j].media[i])
                                     }
                                 }
-                                console.log("###########")
-                                es.delete({index:esindex,id:req.params.id})
                                 db.collection('answers').deleteMany({ 'questionID': req.params.id })
                             }
                         }
+                        es.delete({index:esindex,id:req.params.id})
                         console.log(req.params.id+" deleted success")
                         request({  
                             url: 'http://192.168.122.35:3000/deletemedia',

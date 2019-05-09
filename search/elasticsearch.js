@@ -7,7 +7,7 @@ const mongo_address = 'mongodb://192.168.122.39:27017';
 var jsonParser = bodyParser.json()
 const esindex = "test"
 
-const port =3001
+const port = 3001
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
     host: '130.245.171.61:9200'
@@ -39,9 +39,9 @@ app.post('/search', jsonParser, function (req, res) {
     }
     sort_q = {}
     if (req.body.sort_by == null || req.body.sort_by == "score") {
-        sort_q =  "score:desc" 
+        sort_q = "score:desc"
     } else {
-        sort_q = "timestamp:desc" 
+        sort_q = "timestamp:desc"
     }
     if (req.body.accepted) {
         must.push({ exist: { field: accepted_answer_id } })
@@ -67,7 +67,7 @@ app.post('/search', jsonParser, function (req, res) {
         db.collection('questions').find({ "id": { $in: resultID } }).toArray(function (err, result) {
             if (err) console.log(err);
             var questions = []
-            console.log("mongodb found "+result.length)
+            console.log("mongodb found " + result.length)
             for (var i in result) {
                 var question = result[i]
                 var views = []
@@ -85,52 +85,53 @@ app.post('/search', jsonParser, function (req, res) {
                 question['answer_count'] = answers.length
                 console.log("reach")
                 console.log(question.user)
-                memcached.get(question.user,function(err,data){
-                    if(err) console.log(err)
-                    console.log(data)
-                    if(data!=null){
-                        console.log("cache!")
-                        question.user = data   
-                        questions.push(question)
-                    }else{
-                        console.log("no cache :(")
-                        db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
-                            if (err) console.log(err)
-                            if (result.length != 1) {
-                                res.status(404)
-                                console.log("user not found")
-                                return res.json({ 'status': 'error', 'error': 'user not found' })
-                            }
-                            if (result[0].reputation < 1) {
-                                result[0].reputation = 1
-                            }
-                            question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
-                            questions.push(question)
-                            memcached.set(question.user,{ 'username': result[0].username, 'reputation': result[0].reputation }
-                            , 10, function (err) {
-                                if(err) console.log("cache error:"+err)
-                                else console.log("cache "+ question.user+ " success")
-                            })
-                        })
+                /*  memcached.get(question.user,function(err,data){
+                     if(err) console.log(err)
+                     console.log(data)
+                     if(data!=null){
+                         console.log("cache!")
+                         question.user = data   
+                         questions.push(question)
+                     }else{
+                         console.log("no cache :(") */
+                db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
+                    if (err) console.log(err)
+                    if (result.length != 1) {
+                        res.status(404)
+                        console.log("user not found")
+                        return res.json({ 'status': 'error', 'error': 'user not found' })
                     }
-                })   
+                    if (result[0].reputation < 1) {
+                        result[0].reputation = 1
+                    }
+                    question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
+                    questions.push(question)
+                    /*memcached.set(question.user,{ 'username': result[0].username, 'reputation': result[0].reputation }
+                    , 10, function (err) {
+                        if(err) console.log("cache error:"+err)
+                        else console.log("cache "+ question.user+ " success")
+                    })
+                })
             }
-            res.json({ 'status': 'OK', 'questions': questions })
+        })    */
+                })
+                res.json({ 'status': 'OK', 'questions': questions })
+            }
         })
     })
-});
+    });
 
-MongoClient.connect(mongo_address, (err, client) => {
-    // ... start the server
-    if (err) {
-        console.log(err);
-    } else {
-        console.log("success connet to db");
-    }
-    db = client.db('pro');
-    //console.log(db);
-    app.locals.db = db;
-})
+    MongoClient.connect(mongo_address, (err, client) => {
+        // ... start the server
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("success connet to db");
+        }
+        db = client.db('pro');
+        //console.log(db);
+        app.locals.db = db;
+    })
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-module.exports = app;
+    app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+    module.exports = app;

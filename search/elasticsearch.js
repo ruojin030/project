@@ -86,6 +86,7 @@ app.post('/search', jsonParser, function (req, res) {
                 console.log("reach")
                 console.log(question.user)
                 memcached.get(question.user,function(err,data){
+                    if(err) console.log(err)
                     if(data!=null){
                         question.user = data
                         console.log("cache!")

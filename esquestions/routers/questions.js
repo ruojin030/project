@@ -286,7 +286,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                                     }
                                 }
                                 db.collection('answers').deleteMany({ 'questionID': req.params.id })
-                                es.delete({id:req.params.id,index:esindex})
+                                es.delete({index:esindex,id:req.params.id})
                             }
                         }
                         console.log(req.params.id+" deleted success")

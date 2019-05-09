@@ -96,11 +96,11 @@ app.post('/search', jsonParser, function (req, res) {
                          console.log("no cache :(") */
                 db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                     if (err) console.log(err)
-                    /*if (result.length != 1) {
+                    if (result.length != 1) {
                         res.status(404)
                         console.log("user not found found "+result.length)
                         return res.json({ 'status': 'error', 'error': 'user not found' })
-                    }*/
+                    }
                     if (result[0].reputation < 1) {
                         result[0].reputation = 1
                     }
@@ -115,8 +115,8 @@ app.post('/search', jsonParser, function (req, res) {
             }
         })    */
                 })
-                res.json({ 'status': 'OK', 'questions': questions })
             }
+            res.json({ 'status': 'OK', 'questions': questions })
         })
     })
 });

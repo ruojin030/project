@@ -62,8 +62,7 @@ app.post('/search', jsonParser, function (req, res) {
         console.log("es found" + hits.length);
         var resultID = []
         for (var i in hits) {
-            resultID.push(hits[i]._source);
-            console.log(hits[i])
+            resultID.push(hits[i]._id);
         }
         console.log(resultID)
         db.collection('questions').find({ "id": { $in: resultID } }).toArray(function (err, result) {

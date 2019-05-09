@@ -7,7 +7,7 @@ router.get('/',function(req,res){
         db.collection('questions').remove({},function(err,result){
             db.collection('users').remove({},function (err, result){
                 db.collection('medias').remove({},function(err,result){
-                    req.body.locals.es.deleteByQuery({index:process.env.ES_INDEX, body:{query:{match_all:{}}}}).then(function(resp){
+                    req.app.locals.es.deleteByQuery({index:process.env.ES_INDEX, body:{query:{match_all:{}}}}).then(function(resp){
                         res.json({"status":"OK"})
                     })       
                 })

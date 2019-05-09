@@ -98,7 +98,7 @@ app.post('/search', jsonParser, function (req, res) {
                     if (err) console.log(err)
                     if (result.length != 1) {
                         res.status(404)
-                        console.log("user not found")
+                        console.log("user not found found "+result.length)
                         return res.json({ 'status': 'error', 'error': 'user not found' })
                     }
                     if (result[0].reputation < 1) {
@@ -119,19 +119,19 @@ app.post('/search', jsonParser, function (req, res) {
             }
         })
     })
-    });
+});
 
-    MongoClient.connect(mongo_address, (err, client) => {
-        // ... start the server
-        if (err) {
-            console.log(err);
-        } else {
-            console.log("success connet to db");
-        }
-        db = client.db('pro');
-        //console.log(db);
-        app.locals.db = db;
-    })
+MongoClient.connect(mongo_address, (err, client) => {
+    // ... start the server
+    if (err) {
+        console.log(err);
+    } else {
+        console.log("success connet to db");
+    }
+    db = client.db('pro');
+    //console.log(db);
+    app.locals.db = db;
+})
 
-    app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-    module.exports = app;
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+module.exports = app;

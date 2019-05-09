@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "elasticsearch": "^16.0.0",
     "express": "^4.16.4",
+    "memcached": "^2.2.2",
     "mongod": "^2.0.0",
     "mongodb": "^3.2.2",
     "sleep": "^6.0.0"

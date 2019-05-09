@@ -37,7 +37,7 @@ MongoClient.connect(mongo_address, (err, client) => {
   })
 var client = new elasticsearch.Client({
     host: '130.245.171.61:9200',
-    log:"error_trace"
+    log:'error'
 });
 app.locals.es = client
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

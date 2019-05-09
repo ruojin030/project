@@ -84,6 +84,7 @@ app.post('/search', jsonParser, function (req, res) {
                 delete question.answers
                 question['answer_count'] = answers.length
                 console.log("reach")
+                console.log(question.user)
                 memcached.get(question.user,function(err,data){
                     if(data!=null){
                         question.user = data

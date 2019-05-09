@@ -78,7 +78,7 @@ router.post('/add', jsonParser, function (req, res) {
                             db.collection('questions').insertOne(data)
                             var esData = data
                             delete esData.id
-                            console.log(esData)
+                            console.log(data)
                             es.index({index:esindex,body:esData,id:data.id})
                             console.log(data['id'] +" add success by "+ req.cookies.session.current_user)
                             res.json({ 'status': "OK", 'id': data.id })

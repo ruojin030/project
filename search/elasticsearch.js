@@ -59,12 +59,11 @@ app.post('/search', jsonParser, function (req, res) {
         body: { query: { bool: { "must": must } } }
     }).then(function (resp) {
         var hits = resp.hits.hits;
-        console.log("es found" + hits.length);
+        console.log("es found:" + hits.length);
         var resultID = []
         for (var i in hits) {
             resultID.push(hits[i]._id);
         }
-        console.log(resultID)
         db.collection('questions').find({ "id": { $in: resultID } }).toArray(function (err, result) {
             if (err) console.log(err);
             var questions = []
@@ -84,9 +83,11 @@ app.post('/search', jsonParser, function (req, res) {
                 delete question._id
                 delete question.answers
                 question['answer_count'] = answers.length
+                console.log("reach")
                 memcached.get(question.user,function(err,data){
                     if(data!=null){
                         question.user = data
+                        console.log("cache!")
                         questions.push(question)
                     }else{
                         db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
@@ -100,6 +101,7 @@ app.post('/search', jsonParser, function (req, res) {
                                 result[0].reputation = 1
                             }
                             question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
+                            console.log("no cache :(")
                             questions.push(question)
                             memcached.set(question.user,{ 'username': result[0].username, 'reputation': result[0].reputation }
                             , 100, function (err) {

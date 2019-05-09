@@ -76,8 +76,9 @@ router.post('/add', jsonParser, function (req, res) {
                                 db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
                             }
                             db.collection('questions').insertOne(data)
-                            
-                            es.index({index:esindex,body:data})
+                            var esData = data
+                            delete esData.id
+                            es.index({index:esindex,body:esData, id:data.id})
                             console.log(data['id'] +" add success by "+ req.cookies.session.current_user)
                             res.json({ 'status': "OK", 'id': data.id })
                         }

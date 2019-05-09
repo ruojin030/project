@@ -6,7 +6,7 @@ var jsonParser = bodyParser.json()
 var path = require('path');
 var cookieParser = require('../node_modules/cookie-parser');
 var request = require("../node_modules/request")
-
+const esindex = "test"
 
 router.get('/', function (req, res) {
     res.sendFile(path.resolve('../questions/questions.html'));
@@ -76,7 +76,7 @@ router.post('/add', jsonParser, function (req, res) {
                                 db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
                             }
                             db.collection('questions').insertOne(data)
-                            es.index({index:process.env.ES_INDEX,body:data,"id":data.id})
+                            es.index({index:esindex,body:data,id:data.id})
                             console.log(data['id'] +" add success by "+ req.cookies.session.current_user)
                             res.json({ 'status': "OK", 'id': data.id })
                         }
@@ -281,7 +281,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                                     }
                                 }
                                 db.collection('answers').deleteMany({ 'questionID': req.params.id })
-                                es.delete({id:req.params.id,index:process.env.ES_INDEX})
+                                es.delete({id:req.params.id,index:esindex})
                             }
                         }
                         console.log(req.params.id+" deleted success")

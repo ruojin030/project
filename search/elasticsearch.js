@@ -5,6 +5,7 @@ var Memcached = require('memcached');
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.39:27017';
 var jsonParser = bodyParser.json()
+const esindex = "test"
 
 const port =3001
 var elasticsearch = require('elasticsearch');
@@ -52,7 +53,7 @@ app.post('/search', jsonParser, function (req, res) {
         must.push({ match: { tags: { query: req.body.tags.join(' '), "operator": "and" } } })
     }
     client.search({
-        index: process.env.ES_INDEX,
+        index: esindex,
         size: req.body.limit,
         sort: sort_q,
         body: { query: { bool: { "must": must } } }

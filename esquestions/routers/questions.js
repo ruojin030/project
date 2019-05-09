@@ -32,13 +32,15 @@ router.post('/add', jsonParser, function (req, res) {
                     return res.json({ 'status': 'error', 'error': 'wrong request type' })
                 }
                 var data = {}
+                var esdata = {}
                 if (req.body.media == null) {
                     req.body.media = []
                     data['has_media'] = false
                 } else {
                     data['has_media'] = true
                 }
-                data['id'] = uniqid()
+                var id1 = uniqid()
+                data['id'] = id1
                 data['user'] = req.cookies.session.current_user
                 data['title'] = req.body.title
                 data['body'] = req.body.body
@@ -285,7 +287,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                                         media.push(r[j].media[i])
                                     }
                                 }
-                                console.log("heere!!!!!")
+                                console.log("###########")
                                 es.delete({index:esindex,id:req.params.id})
                                 db.collection('answers').deleteMany({ 'questionID': req.params.id })
                             }

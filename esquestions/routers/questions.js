@@ -38,7 +38,6 @@ router.post('/add', jsonParser, function (req, res) {
                 } else {
                     data['has_media'] = true
                 }
-                data['id'] = uniqid();
                 data['user'] = req.cookies.session.current_user
                 data['title'] = req.body.title
                 data['body'] = req.body.body
@@ -75,8 +74,9 @@ router.post('/add', jsonParser, function (req, res) {
                             for (i in req.body.media) {
                                 db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
                             }
-                            console.log(data)
-                            es.index({index:esindex,body:data,id:data.id})
+                            var id1 = uniqid()
+                            data['id'] = id1
+                            es.index({index:esindex,body:data,id:id1})
                             db.collection('questions').insertOne(data)
                             console.log(data['id'] +" add success by "+ req.cookies.session.current_user)
                             res.json({ 'status': "OK", 'id': data.id })

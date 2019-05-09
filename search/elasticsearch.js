@@ -65,7 +65,7 @@ app.post('/search', jsonParser, function (req, res) {
             resultID.push(hits[i]._id);
         }
         db.collection('questions').find({ "id": { $in: resultID } }).toArray(function (err, result) {
-            if (err) console.log(err);
+            if (err) console.log("question found err:"+err);
             var questions = []
             console.log("mongodb found " + result.length)
             for (var i in result) {
@@ -93,7 +93,7 @@ app.post('/search', jsonParser, function (req, res) {
                      }else{
                          console.log("no cache :(") */
                 db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
-                    if (err) console.log(err)
+                    if (err) console.log("db found error "+err)
                     if (result.length != 1) {
                         res.status(404)
                         console.log("user not found found "+result.length)

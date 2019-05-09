@@ -36,7 +36,8 @@ MongoClient.connect(mongo_address, (err, client) => {
     db.collection("questions").createIndex({'title':"text",'body':"text"},{default_language: "none"}  )
   })
 var client = new elasticsearch.Client({
-    host: '130.245.171.61:9200'
+    host: '130.245.171.61:9200',
+    log:"error_trace"
 });
 app.locals.es = client
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

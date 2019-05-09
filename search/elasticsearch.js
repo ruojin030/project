@@ -115,6 +115,7 @@ app.post('/search', jsonParser, function (req, res) {
         })    */
                 })
             }
+            console.log("return")
             res.json({ 'status': 'OK', 'questions': questions })
         })
     })

@@ -10,10 +10,10 @@ const esindex = "test"
 const port =3001
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-    host: process.env.ES_IP
+    host: '130.245.171.61:9200'
 });
 
-var memcached = new Memcached(process.env.CACHE_IP);
+var memcached = new Memcached('localhost:11211');
 
 app.post('/search', jsonParser, function (req, res) {
     //console.log("nobody nobody but u <3")

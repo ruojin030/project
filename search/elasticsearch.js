@@ -99,7 +99,7 @@ app.post('/search', jsonParser, function (req, res) {
                         console.log("user not found found "+result.length)
                         return res.json({ 'status': 'error', 'error': 'user not found' })
                     }
-                    console.log(result.length)
+                    //console.log(result.length)
                     if (result[0].reputation < 1) {
                         result[0].reputation = 1
                     }
@@ -114,8 +114,8 @@ app.post('/search', jsonParser, function (req, res) {
             }
         })    */
                 })
-            }
-            questions.push(question)
+                questions.push(question)
+            }           
             res.json({ 'status': 'OK', 'questions': questions })
         })
     })

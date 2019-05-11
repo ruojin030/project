@@ -4,7 +4,6 @@ const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.39:27017';
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json()
-var sleep = require('sleep');
 
 const port = 3001
 

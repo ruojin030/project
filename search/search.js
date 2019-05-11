@@ -76,7 +76,7 @@ app.post('/search', jsonParser, function (req, res) {
             delete question._id
             delete question.answers
             question['answer_count'] = answers.length
-            db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
+            /*db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                 if (err) console.log(err)
                 if(result.length!=1){
                     res.status(404)
@@ -87,7 +87,7 @@ app.post('/search', jsonParser, function (req, res) {
                     result[0].reputation = 1
                 }
                 question.user = { 'username': result[0].username, 'reputation': result[0].reputation }
-            })
+            })*/
             questions.push(question)
         }
         res.json({ 'status': 'OK', 'questions': questions })

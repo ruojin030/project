@@ -22,7 +22,7 @@ router.post('/add', jsonParser, function (req, res) {
     } else {
         if (req.body.title == null || req.body.body == null || req.body.tags == null) {
             console.log("body miss part")
-            res.status(404)
+            res.status(405)
             return res.json({ 'status': 'error', 'error': 'wrong request type' })
         }
         var data = {}
@@ -47,7 +47,7 @@ router.post('/add', jsonParser, function (req, res) {
         data['downvoters'] = []
         db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
             if (result == null && req.body.media.length != 0) {
-                res.status(404)
+                res.status(406)
                 console.log("no media can be add")
                 return res.json({ 'status': 'error', 'error': 'media error' })
             } else {
@@ -63,7 +63,7 @@ router.post('/add', jsonParser, function (req, res) {
                     }
                 }
                 if (!correct) {
-                    res.status(404)
+                    res.status(406)
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
 
@@ -245,7 +245,7 @@ router.delete('/:id', jsonParser, function (req, res) {
     var memcached = req.app.locals.memcached
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(403)
-        console.log("not login")
+        console.log("delete not login")
         return res.json({ 'status': 'error', 'error': 'not login' })
     }
     //console.log(req.cookies.session.current_user)
@@ -260,7 +260,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                 db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
                     if (err) {
                         console.log("delete failded")
-                        res.sendStatus(403)
+                        res.sendStatus(405)
                     }
                     db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, r) {
                         if (r != null) {
@@ -280,19 +280,20 @@ router.delete('/:id', jsonParser, function (req, res) {
                             url: 'http://192.168.122.35:3000/deletemedia',
                             method: 'POST',
                             json: { 'media': media }
-                        }, function (err, resp, body1) {
+                        }/* , function (err, resp, body1) {
                             if (err) {
-                                return res.sendStatus(404)
+                                return res.sendStatus(406)
                             }
                             else {
                                 if (body1.status == 'error') {
                                     console.log('media delete error')
-                                    return res.sendStatus(404)
+                                    return res.sendStatus(407)
                                 } else {
                                     return res.sendStatus(200)
                                 }
                             }
-                        });
+                        } */);
+                        return res.sendStatus(200)
                     })
                 })
             }
@@ -300,12 +301,12 @@ router.delete('/:id', jsonParser, function (req, res) {
                 db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
                     if (result.length != 1) {
                         console.log(req.params.id + " not found")
-                        return res.sendStatus(403)
+                        return res.sendStatus(408)
                     } else {
                         var question = result[0]
                         if (question.user != req.cookies.session.current_user) {
                             console.log("poster wrong")
-                            return res.sendStatus(403)
+                            return res.sendStatus(409)
                         } else {
                             for (i in result[0].media) {
                                 media.push(result[0].media[i])
@@ -313,7 +314,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                             db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
                                 if (err) {
                                     console.log("delete failded")
-                                    res.sendStatus(403)
+                                    res.sendStatus(405)
                                 }
                                 db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, r) {
                                     if (r != null) {
@@ -334,19 +335,20 @@ router.delete('/:id', jsonParser, function (req, res) {
                                         url: 'http://192.168.122.35:3000/deletemedia',
                                         method: 'POST',
                                         json: { 'media': media }
-                                    }, function (err, resp, body1) {
+                                    }/* , function (err, resp, body1) {
                                         if (err) {
-                                            return res.sendStatus(404)
+                                            return res.sendStatus(406)
                                         }
                                         else {
                                             if (body1.status == 'error') {
                                                 console.log('media delete error')
-                                                return res.sendStatus(404)
+                                                return res.sendStatus(407)
                                             } else {
                                                 return res.sendStatus(200)
                                             }
                                         }
-                                    });
+                                    } */);
+                                    return res.sendStatus(200)
                                 })
                             })
                         }
@@ -355,7 +357,7 @@ router.delete('/:id', jsonParser, function (req, res) {
             }
             else{
                 console.log("not poster")
-                return res.sendStatus(404)
+                return res.sendStatus(409)
             }
         }
     })

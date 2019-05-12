@@ -196,7 +196,9 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                         if(data != null){
                             console.log("hit!")
                             db.collection('questions').updateOne({ 'id': req.params.id }, { $push: { 'answers': id } })
-                            //db.collection("medias").updateMany({ 'id': {$in:req.body.media} }, { "used": true })
+                            if(req.body.media.length!= 0){
+                                db.collection("medias").updateMany({ 'id': {$in:req.body.media} }, { "used": true })
+                            }
                             db.collection('answers').insertOne(answer, function (err, res) {
                                 if (err) console.log(err)
                             })
@@ -212,7 +214,9 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                                 }
                                 else {
                                     db.collection('questions').updateOne({ 'id': req.params.id }, { $push: { 'answers': id } })
-                                    db.collection("medias").updateOne({ "id": {$in:req.body.media }}, { "used": true })
+                                    if(req.body.media.length!= 0){
+                                        db.collection("medias").updateMany({ 'id': {$in:req.body.media} }, { "used": true })
+                                    }
                                     db.collection('answers').insertOne(answer, function (err, res) {
                                         if (err) console.log(err)
                                     })              

@@ -66,9 +66,9 @@ router.post('/add', jsonParser, function (req, res) {
                     res.status(406)
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
-
+                    if(req.body.media!=0){
                     db.collection("medias").updateMany({ "id": {$in:req.body.media} }, { $set: { "used": true } })
-                    
+                    }
                     db.collection('questions').insertOne(data)
                     memcached.add(data.id,req.cookies.session.current_user,600,function(err){
                        if(err) console.log(err)

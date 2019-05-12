@@ -3,6 +3,7 @@ const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.39:27017';
 var cookieParser = require('cookie-parser');
+var memcached = new Memcached('localhost:11211');
 
 const port = 3000
 
@@ -10,6 +11,7 @@ const port = 3000
 app.use(cookieParser());
 
 
+app.locals.memcached = memcached
 var questions = require("./routers/questions")
 var answers = require("./routers/answers")
 var reset = require("./routers/reset")

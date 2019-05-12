@@ -13,6 +13,7 @@ router.get('/', function (req, res) {
 });
 router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
+    var memcached = req.app.locals.memcached
     //console.log(req)
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(403)
@@ -65,10 +66,13 @@ router.post('/add', jsonParser, function (req, res) {
                     res.status(404)
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
-                    for (i in req.body.media) {
-                        db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
-                    }
+
+                    db.collection("medias").updateMany({ "id": {$in:req.body.media} }, { $set: { "used": true } })
+                    
                     db.collection('questions').insertOne(data)
+                    memcached.add(data.id,req.cookies.session.current_user,600,function(err){
+                       if(err) console.log(err)
+                    })
                     //console.log(data['id'] + " add success by " + req.cookies.session.current_user)
                     res.json({ 'status': "OK", 'id': data.id })
                 }
@@ -142,6 +146,7 @@ router.get('/:id', jsonParser, function (req, res) {
 router.post('/:id/answers/add', jsonParser, function (req, res) {
     //console.log("add answers")
     var db = req.app.locals.db
+    var memcached = req.app.locals.memcached
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(404)
         console.log("user not login")
@@ -184,37 +189,38 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                     res.status(404)
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
-                    
-                    db.collection("medias").updateMany({ "id":{$in:req.body.media} }, { $set: { "used": true } })
-                    
-                    db.collection('answers').insertOne(answer, function (err, res) {
-                        if (err) console.log(err)
-                    })
-                    db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
-                        if (result.length != 1) {
-                            res.status(404)
-                            console.log("question " + req.params.id + "not found")
-                            return res.json({ 'status': 'error', 'error': 'question not found' })
-                        }
-                        else {
-                            /*var question = result[0]
-                            var answers = []
-                            for (var i in question.answers) {
-                                answers.push(question.answers[i])
-                            }
-                            answers.push(id)*/
+                    //db.collection("medias").updateMany({ "id":{$in:req.body.media} }, { $set: { "used": true } })
+                    memcached.get(req.params.id,function(err,datd){
+                        if(err) console.log(err)
+                        if(data != null){
                             db.collection('questions').updateOne({ 'id': req.params.id }, { $push: { 'answers': id } })
-                            /*db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
-                                if (err) throw err;
-                                //console.log("question:"+req.params.id+"add one answer");
-                            });*/
-                            for (i = 0; i < req.body.media; i++) {
-                                db.collection("medias").updateOne({ "id": req.body.media[i] }, { "used": true })
-                            }
+                            db.collection("medias").updateMany({ "id": {$in:req.body.media} }, { "used": true })
+                            db.collection('answers').insertOne(answer, function (err, res) {
+                                if (err) console.log(err)
+                            })
                             //console.log("answer add success by " + req.cookies.session.current_user + " to " + req.params.id)
-                            res.json({ 'status': 'OK', 'id': id })
+                            res.json({ 'status': 'OK', 'id': id })    
+                        }
+                        else{
+                            db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
+                                if (result.length != 1) {
+                                    res.status(404)
+                                    console.log("question " + req.params.id + "not found")
+                                    return res.json({ 'status': 'error', 'error': 'question not found' })
+                                }
+                                else {
+                                    db.collection('questions').updateOne({ 'id': req.params.id }, { $push: { 'answers': id } })
+                                    db.collection("medias").updateOne({ "id": {$in:req.body.media }}, { "used": true })
+                                    db.collection('answers').insertOne(answer, function (err, res) {
+                                        if (err) console.log(err)
+                                    })              
+                                    //console.log("answer add success by " + req.cookies.session.current_user + " to " + req.params.id)
+                                    res.json({ 'status': 'OK', 'id': id })
+                                }
+                            })
                         }
                     })
+                    
                 }
             }
         })
@@ -236,23 +242,18 @@ router.delete('/:id', jsonParser, function (req, res) {
     //need to delete the media
     media = []
     var db = req.app.locals.db
+    var memcached = req.app.locals.memcached
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         res.status(403)
         console.log("not login")
         return res.json({ 'status': 'error', 'error': 'not login' })
-
     }
     //console.log(req.cookies.session.current_user)
-    db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
-        if (result.length != 1) {
-            console.log(req.params.id + " not found")
-            return res.sendStatus(403)
-        } else {
-            var question = result[0]
-            if (question.user != req.cookies.session.current_user) {
-                console.log("poster wrong")
-                return res.sendStatus(403)
-            } else {
+    memcached.get(req.params.id,function(err,data){
+        if(err){
+            console.log(err)
+        }else{
+            if(data == req.cookies.session.current_user){
                 for (i in result[0].media) {
                     media.push(result[0].media[i])
                 }
@@ -265,15 +266,16 @@ router.delete('/:id', jsonParser, function (req, res) {
                         if (r != null) {
                             if (r.length != 0) {
                                 for (j in r) {
-                                    //console.log(r[j])
                                     for (i in r[j].media) {
                                         media.push(r[j].media[i])
                                     }
                                 }
                                 db.collection('answers').deleteMany({ 'questionID': req.params.id })
+                                memcached.del(req.params.id,function(err){
+                                    if(err) console.log(err)
+                                })
                             }
                         }
-                        //console.log(req.params.id + " deleted success")
                         request({
                             url: 'http://192.168.122.35:3000/deletemedia',
                             method: 'POST',
@@ -293,6 +295,67 @@ router.delete('/:id', jsonParser, function (req, res) {
                         });
                     })
                 })
+            }
+            else if (data == null){
+                db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
+                    if (result.length != 1) {
+                        console.log(req.params.id + " not found")
+                        return res.sendStatus(403)
+                    } else {
+                        var question = result[0]
+                        if (question.user != req.cookies.session.current_user) {
+                            console.log("poster wrong")
+                            return res.sendStatus(403)
+                        } else {
+                            for (i in result[0].media) {
+                                media.push(result[0].media[i])
+                            }
+                            db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
+                                if (err) {
+                                    console.log("delete failded")
+                                    res.sendStatus(403)
+                                }
+                                db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, r) {
+                                    if (r != null) {
+                                        if (r.length != 0) {
+                                            for (j in r) {
+                                                for (i in r[j].media) {
+                                                    media.push(r[j].media[i])
+                                                }
+                                            }
+                                            db.collection('answers').deleteMany({ 'questionID': req.params.id })
+                                            memcached.del(req.params.id,function(err){
+                                                if(err) console.log(err)
+                                            })                                            
+                                        }
+                                    }
+                                    //console.log(req.params.id + " deleted success")
+                                    request({
+                                        url: 'http://192.168.122.35:3000/deletemedia',
+                                        method: 'POST',
+                                        json: { 'media': media }
+                                    }, function (err, resp, body1) {
+                                        if (err) {
+                                            return res.sendStatus(404)
+                                        }
+                                        else {
+                                            if (body1.status == 'error') {
+                                                console.log('media delete error')
+                                                return res.sendStatus(404)
+                                            } else {
+                                                return res.sendStatus(200)
+                                            }
+                                        }
+                                    });
+                                })
+                            })
+                        }
+                    }
+                })
+            }
+            else{
+                console.log("not poster")
+                return res.sendStatus(404)
             }
         }
     })
@@ -369,10 +432,6 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
                 if (err) console.log(err);
                 //console.log(username + " reputation updated " + changed)
             })
-            /* db.collection('users').updateOne({ 'username': username }, { $max: { 'reputation': 1 } }, function (err, res) {
-                if (err) console.log(err);
-                //console.log(username + " reputation <=1")
-            }) */
             res.json({ 'status': 'OK' })
         }
     })

@@ -226,8 +226,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                                 }
                             })
                         }
-                    })
-                    
+                    })       
                 }
             }
         })
@@ -260,6 +259,7 @@ router.delete('/:id', jsonParser, function (req, res) {
         if(err){
             console.log(err)
         }else{
+            if(data != null){
             if(data['user'] == req.cookies.session.current_user){
                 for (i in data['media']) {
                     media.push(data['media'][i])
@@ -304,7 +304,12 @@ router.delete('/:id', jsonParser, function (req, res) {
                     })
                 })
             }
-            else if (data == null){
+            else{
+                console.log("not poster")
+                return res.sendStatus(409)
+            }
+        }
+            else{
                 db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
                     if (result.length != 1) {
                         console.log(req.params.id + " not found")
@@ -361,10 +366,6 @@ router.delete('/:id', jsonParser, function (req, res) {
                         }
                     }
                 })
-            }
-            else{
-                console.log("not poster")
-                return res.sendStatus(409)
             }
         }
     })

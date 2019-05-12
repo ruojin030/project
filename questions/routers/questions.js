@@ -70,7 +70,10 @@ router.post('/add', jsonParser, function (req, res) {
                     db.collection("medias").updateMany({ "id": {$in:req.body.media} }, { $set: { "used": true } })
                     }
                     db.collection('questions').insertOne(data)
-                    memcached.add(data.id,req.cookies.session.current_user,600,function(err){
+                    data = {}
+                    data['user'] = req.cookies.session.current_user
+                    data['media'] = req.body.media
+                    memcached.add(data.id,data,600,function(err){
                        if(err) console.log(err)
                     })
                     //console.log(data['id'] + " add success by " + req.cookies.session.current_user)
@@ -257,9 +260,9 @@ router.delete('/:id', jsonParser, function (req, res) {
         if(err){
             console.log(err)
         }else{
-            if(data == req.cookies.session.current_user){
-                for (i in result[0].media) {
-                    media.push(result[0].media[i])
+            if(data['user'] == req.cookies.session.current_user){
+                for (i in data['media']) {
+                    media.push(data['media'][i])
                 }
                 db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
                     if (err) {

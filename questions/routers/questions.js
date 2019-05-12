@@ -191,7 +191,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
                     //db.collection("medias").updateMany({ "id":{$in:req.body.media} }, { $set: { "used": true } })
-                    memcached.get(req.params.id,function(err,datd){
+                    memcached.get(req.params.id,function(err,data){
                         if(err) console.log(err)
                         if(data != null){
                             console.log("hit!")

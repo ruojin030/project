@@ -20,7 +20,7 @@ app.post('/search', jsonParser, function (req, res) {
     var accepted = req.body.accepted
     var q = req.body.q
 
-    console.log("timestamps:" + req.body.timestamp + "\t limit:" + req.body.limit + "\t accepted:" + req.body.accepted + "\t q:" + req.body.q)
+    //console.log("timestamps:" + req.body.timestamp + "\t limit:" + req.body.limit + "\t accepted:" + req.body.accepted + "\t q:" + req.body.q)
     if (req.body.timestamp == null) {
         req.body.timestamp = Date.now() / 1000 | 0
     }
@@ -53,12 +53,12 @@ app.post('/search', jsonParser, function (req, res) {
     }
     if (req.body.q != null && req.body.q != "") {
         query.$text = { $search: req.body.q, $language: "none" }//$diacriticSensitive: false,$caseSensitive: false}//{$search:q}//
-        console.log(query)
+        //console.log(query)
     }
 
     db.collection('questions').find(query).limit(req.body.limit).sort(sort_q).toArray(function (err, result) {
         if (err) throw err;
-        console.log("THE NUM OF RESULT IS " + result.length)
+        //console.log("THE NUM OF RESULT IS " + result.length)
         var questions = []
         for (var i in result) {
             var question = result[i]

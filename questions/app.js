@@ -1,7 +1,7 @@
 var express = require('express');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
-const mongo_address = 'mongodb://192.168.122.4:27017';
+const mongo_address = 'mongodb://192.168.122.47:27017';
 var cookieParser = require('cookie-parser');
 var Memcached = require('memcached');
 var memcached = new Memcached('localhost:11211');

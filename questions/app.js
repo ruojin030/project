@@ -3,6 +3,7 @@ const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.39:27017';
 var cookieParser = require('cookie-parser');
+var Memcached = require('memcached');
 var memcached = new Memcached('localhost:11211');
 
 const port = 3000

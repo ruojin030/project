@@ -10,7 +10,7 @@ const port = 3000
 
 
 app.use(cookieParser());
-app.locals.memcached = memcached
+//app.locals.memcached = memcached
 
 var questions = require("./routers/questions")
 var answers = require("./routers/answers")

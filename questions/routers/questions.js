@@ -72,7 +72,6 @@ router.post('/add', jsonParser, function (req, res) {
                     db.collection('questions').insertOne(data)
                     memcached.add(data.id,req.cookies.session.current_user,600,function(err){
                        if(err) console.log(err)
-                       console.log("cached!")
                     })
                     //console.log(data['id'] + " add success by " + req.cookies.session.current_user)
                     res.json({ 'status': "OK", 'id': data.id })
@@ -194,7 +193,6 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                     memcached.get(req.params.id,function(err,data){
                         if(err) console.log(err)
                         if(data != null){
-                            console.log("hit!")
                             db.collection('questions').updateOne({ 'id': req.params.id }, { $push: { 'answers': id } })
                             if(req.body.media.length!= 0){
                                 db.collection("medias").updateMany({ 'id': {$in:req.body.media} }, { "used": true })

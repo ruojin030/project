@@ -70,10 +70,10 @@ router.post('/add', jsonParser, function (req, res) {
                     db.collection("medias").updateMany({ "id": {$in:req.body.media} }, { $set: { "used": true } })
                     }
                     db.collection('questions').insertOne(data)
-                    data = {}
-                    data['user'] = req.cookies.session.current_user
-                    data['media'] = req.body.media
-                    memcached.add(data.id,data,600,function(err){
+                    d = {}
+                    d['user'] = req.cookies.session.current_user
+                    d['media'] = req.body.media
+                    memcached.add(data.id,d,600,function(err){
                        if(err) console.log(err)
                     })
                     //console.log(data['id'] + " add success by " + req.cookies.session.current_user)

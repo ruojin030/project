@@ -4,7 +4,7 @@ const MongoClient = require('./node_modules/mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.47:27017';
 var cookieParser = require('./node_modules/cookie-parser');
 //var elasticsearch = require('elasticsearch')
-var memcached = new Memcached('localhost:11211');
+//var memcached = new Memcached('localhost:11211');
 
 const port = 3000
 

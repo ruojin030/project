@@ -72,7 +72,7 @@ router.post('/add', jsonParser, function (req, res) {
                     db.collection('questions').insertOne(data)
                     memcached.add(data.id,req.cookies.session.current_user,600,function(err){
                        if(err) console.log(err)
-                       console.log(add("cached!"))
+                       console.log("cached!")
                     })
                     //console.log(data['id'] + " add success by " + req.cookies.session.current_user)
                     res.json({ 'status': "OK", 'id': data.id })

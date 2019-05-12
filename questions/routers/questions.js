@@ -13,6 +13,7 @@ router.get('/', function (req, res) {
 });
 router.post('/add', jsonParser, function (req, res) {
     var db = req.app.locals.db
+    var media_db = req.app.locals.media_db
     var memcached = req.app.locals.memcached
     //console.log(req)
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
@@ -45,7 +46,7 @@ router.post('/add', jsonParser, function (req, res) {
         data['accepted_answer_id'] = null
         data['upvoters'] = []
         data['downvoters'] = []
-        db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
+        media_db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
             if (result == null && req.body.media.length != 0) {
                 res.status(406)
                 console.log("no media can be add")
@@ -67,7 +68,7 @@ router.post('/add', jsonParser, function (req, res) {
                     return res.json({ 'status': 'error', 'error': 'media error' })
                 } else {
                     if(req.body.media!=0){
-                    db.collection("medias").updateMany({ "id": {$in:req.body.media} }, { $set: { "used": true } })
+                    media_db.collection("medias").updateMany({ "id": {$in:req.body.media} }, { $set: { "used": true } })
                     }
                     db.collection('questions').insertOne(data)
                     d = {}
@@ -171,7 +172,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
         answer['media'] = req.body.media
         answer['voters'] = {}
         answer['questionID'] = req.params.id
-        db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
+        media_db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
             if (result == null && req.body.media.length != 0) {
                 res.status(404)
                 console.log("no media can add.")
@@ -198,7 +199,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                         if(data != null){
                             db.collection('questions').updateOne({ 'id': req.params.id }, { $push: { 'answers': id } })
                             if(req.body.media.length!= 0){
-                                db.collection("medias").updateMany({ 'id': {$in:req.body.media} }, { "used": true })
+                                media_db.collection("medias").updateMany({ 'id': {$in:req.body.media} }, { "used": true })
                             }
                             db.collection('answers').insertOne(answer, function (err, res) {
                                 if (err) console.log(err)
@@ -216,7 +217,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                                 else {
                                     db.collection('questions').updateOne({ 'id': req.params.id }, { $push: { 'answers': id } })
                                     if(req.body.media.length!= 0){
-                                        db.collection("medias").updateMany({ 'id': {$in:req.body.media} }, { "used": true })
+                                        media_db.collection("medias").updateMany({ 'id': {$in:req.body.media} }, { "used": true })
                                     }
                                     db.collection('answers').insertOne(answer, function (err, res) {
                                         if (err) console.log(err)

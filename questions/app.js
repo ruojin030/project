@@ -2,6 +2,7 @@ var express = require('express');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.47:27017';
+const media_address = 'mongodb://192.168.122.28:27017'
 var cookieParser = require('cookie-parser');
 var Memcached = require('memcached');
 var memcached = new Memcached('localhost:11211');
@@ -36,6 +37,17 @@ MongoClient.connect(mongo_address, (err, client) => {
     //console.log(db);
     app.locals.db = db;
     db.collection("questions").createIndex({'title':"text",'body':"text"},{default_language: "none"}  )
+  })
+  MongoClient.connect(media_address, (err, client) => {
+    // ... start the server
+    if(err){
+        console.log(err);
+    }else{
+        console.log("success connet to db");
+    }
+    media_db = client.db('pro');
+    //console.log(db);
+    app.locals.media_db = media_db;
   })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

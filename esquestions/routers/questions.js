@@ -20,7 +20,6 @@ router.post('/add', jsonParser, function (req, res) {
         console.log('user not login')
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {
-        db.collection('users').find({ 'username': req.cookies.session.current_user }).toArray(function (err, result) {
             if (result.length != 1) {
                 console.log(req.cookies.session.current_user+' not in db')
                 res.status(404)
@@ -90,7 +89,6 @@ router.post('/add', jsonParser, function (req, res) {
                     }
                 })
             }
-        })
     }
 });
 

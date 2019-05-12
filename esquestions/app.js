@@ -1,15 +1,16 @@
 var express = require('./node_modules/express');
 const app = express();
 const MongoClient = require('./node_modules/mongodb').MongoClient;
-const mongo_address = 'mongodb://192.168.122.39:27017';
+const mongo_address = 'mongodb://192.168.122.47:27017';
 var cookieParser = require('./node_modules/cookie-parser');
-var elasticsearch = require('elasticsearch')
+//var elasticsearch = require('elasticsearch')
+var memcached = new Memcached('localhost:11211');
 
 const port = 3000
 
 
 app.use(cookieParser());
-
+app.locals.memcached = memcached
 
 var questions = require("./routers/questions")
 var answers = require("./routers/answers")
@@ -21,6 +22,7 @@ app.use('/reset',reset)
 app.get('/',function(req, res){
     res.send("hello")
 })
+
 
 
 MongoClient.connect(mongo_address, (err, client) => {

@@ -3,7 +3,7 @@ const app = express()
 var bodyParser = require('body-parser');
 var Memcached = require('memcached');
 const MongoClient = require('mongodb').MongoClient;
-const mongo_address = 'mongodb://192.168.122.39:27017';
+const mongo_address = 'mongodb://192.168.122.47:27017';
 var jsonParser = bodyParser.json()
 const esindex = "test"
 

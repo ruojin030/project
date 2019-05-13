@@ -88,7 +88,7 @@ router.post('/add', jsonParser, function (req, res) {
 
 router.get('/:id', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    var media_db = req.app.locals.media_db
+    var user_db = req.app.locals.user_db
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(404)
@@ -134,7 +134,7 @@ router.get('/:id', jsonParser, function (req, res) {
             delete question._id
             delete question.answers
             question['answer_count'] = answers.length
-            media_db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
+            user_db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                 if (err) console.log(err)
                 if (result[0].reputation < 1) {
                     result[0].reputation = 1
@@ -375,7 +375,7 @@ router.delete('/:id', jsonParser, function (req, res) {
 
 router.post('/:id/upvote', jsonParser, function (req, res) {
     var db = req.app.locals.db
-    var media_db = req.app.locals.media_db
+    var user_db = req.app.locals.user_db
 
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         console.log("not login")
@@ -440,7 +440,7 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
                 if (err) console.log(err);
                 //console.log(req.params.id + " vote updated");
             });
-            media_db.collection('users').updateOne({ 'username': result[0].user }, { $inc: { 'reputation': changed } }, function (err, res) {
+            user_db.collection('users').updateOne({ 'username': result[0].user }, { $inc: { 'reputation': changed } }, function (err, res) {
                 if (err) console.log(err);
                 //console.log(username + " reputation updated " + changed)
             })

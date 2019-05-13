@@ -5,6 +5,8 @@ var Memcached = require('memcached');
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.47:27017';
 var jsonParser = bodyParser.json()
+var Memcached = require('memcached');
+var memcached = new Memcached('localhost:11211');
 const esindex = "pro.questions"
 
 const port = 3001
@@ -17,19 +19,47 @@ var memcached = new Memcached('localhost:11211');
 
 app.post('/search', jsonParser, function (req, res) {
     //console.log("nobody nobody but u <3")
+    if (req.body.limit == null) {
+        req.body.limit = 25
+    }
+    if (req.body.limit > 100) {
+        req.body.limit = 100
+    }
+    if ((req.body.q == null || req.body.q == "") && req.body.timestamp == null && req.body.sort_by == null && req.body.accepted == null && req.body.has_media == null) {
+        memcached.get("null", function (err, data) {
+            if (err) console.log(err)
+            if (data != null) {
+                console.log("cached!!!!")
+                d = data.slice(0,req.body.limit)
+                return res.json({'status':'OK','questions':d})
+            }else{
+                console.log("$$$$$need cached$$$$$")
+                client.search({
+                    index: esindex,
+                    size: 100,
+                    sort: "score:desc",
+                    body: { query: { match_all:{} } }
+                }).then(function(resp){
+                    var hits = resp.hits.hits;
+                    var questions = []
+                    for (var i in hits) {
+                        questions.push(hits[i]._source);
+                    }
+                    memcached.add('null',questions,5,function(err){if(err)console.log(err)})
+                    que = questions.slice(0,req.body.limit)
+                    res.json({ 'status': 'OK', 'questions': que })
+                })             
+            }
+        })
+    }else{
     var must = []
     console.log("timestamps:" + req.body.timestamp + "\t limit:" + req.body.limit + "\t accepted:" + req.body.accepted + "\t q:" + req.body.q)
     if (req.body.timestamp == null) {
         req.body.timestamp = Date.now() / 1000 | 0
     }
     must.push({ range: { timestamp: { "lte": req.body.timestamp } } })
-    if (req.body.limit == null) {
-        req.body.limit = 25
-    }
 
-    if (req.body.limit > 100) {
-        req.body.limit = 100
-    }
+
     if (req.body.q != null && req.body.q != "") {
         must.push({ match: { title: req.body.q } })
         must.push({ match: { body: req.body.q } })
@@ -119,6 +149,7 @@ app.post('/search', jsonParser, function (req, res) {
             res.json({ 'status': 'OK', 'questions': questions })
         }) */
     })
+}
 });
 
 /* MongoClient.connect(mongo_address, (err, client) => {

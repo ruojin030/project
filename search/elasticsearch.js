@@ -25,7 +25,7 @@ app.post('/search', jsonParser, function (req, res) {
     if (req.body.limit > 100) {
         req.body.limit = 100
     }
-    if ((req.body.q == null || req.body.q == "") && req.body.timestamp == null && req.body.sort_by == null && req.body.accepted == null && req.body.has_media == null) {
+    if ((req.body.q == null || req.body.q == "") && req.body.timestamp == null && req.body.sort_by == null && req.body.accepted == null && req.body.has_media == null&& req.body.tags==null) {
         memcached.get("null", function (err, data) {
             if (err) console.log(err)
             if (data != null) {
@@ -53,15 +53,16 @@ app.post('/search', jsonParser, function (req, res) {
         })
     }else{
     var must = []
+    boo = {}
     console.log("timestamps:" + req.body.timestamp + "\t limit:" + req.body.limit + "\t accepted:" + req.body.accepted + "\t q:" + req.body.q)
     if (req.body.timestamp == null) {
         req.body.timestamp = Date.now() / 1000 | 0
     }
     must.push({ range: { timestamp: { "lte": req.body.timestamp } } })
     
-    filter = {}
+    
     if (req.body.q != null && req.body.q != "") {
-        filter = {multi_match:{"query":   req.body.q, "fields": [ "title", "body" ] }}
+        boo['filter'] = {multi_match:{"query":   req.body.q, "fields": [ "title", "body" ] }}
     } else {
         must.push({ match_all: {} })
     }
@@ -81,11 +82,12 @@ app.post('/search', jsonParser, function (req, res) {
     if (req.body.tags != null) {
         must.push({ match: { tags: { query: req.body.tags.join(' '), "operator": "and" } } })
     }
+    bool['must'] = must
     client.search({
         index: esindex,
         size: req.body.limit,
         sort: sort_q,
-        body: { query: { bool: { "must": must,"filter":filter } } }
+        body: { query: { bool: boo  } }
     }).then(function (resp) {
         var hits = resp.hits.hits;
         console.log("es found:" + hits.length);

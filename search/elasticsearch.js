@@ -58,11 +58,10 @@ app.post('/search', jsonParser, function (req, res) {
         req.body.timestamp = Date.now() / 1000 | 0
     }
     must.push({ range: { timestamp: { "lte": req.body.timestamp } } })
-
-
+    
+    filter = {}
     if (req.body.q != null && req.body.q != "") {
-        must.push({ match: { title: req.body.q } })
-        must.push({ match: { body: req.body.q } })
+        filter = {multi_match:{"query":   req.body.q, "fields": [ "title", "body" ] }}
     } else {
         must.push({ match_all: {} })
     }
@@ -86,7 +85,7 @@ app.post('/search', jsonParser, function (req, res) {
         index: esindex,
         size: req.body.limit,
         sort: sort_q,
-        body: { query: { bool: { "must": must } } }
+        body: { query: { bool: { "must": must,"filter":filter } } }
     }).then(function (resp) {
         var hits = resp.hits.hits;
         console.log("es found:" + hits.length);

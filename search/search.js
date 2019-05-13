@@ -21,25 +21,17 @@ app.post('/search', jsonParser, function (req, res) {
     if (req.body.limit == null) {
         req.body.limit = 25
     }
-    sort_q = {}
-    if (req.body.sort_by == null || req.body.sort_by == "score") {
-        sort_q = { "score": -1 }
-        req.body.sort_by = "score"
-    } else {
-        sort_q = { "timestamp": -1 }
-        req.body.sort_by = "timestamp"
-    }
-    if ((req.body.q == null || req.body.q == "") && req.body.timestamp == null  && req.body.accepted == null && req.body.has_media == null) {
-        memcached.get(req.body.sort_by, function (err, data) {
+    if ((req.body.q == null || req.body.q == "") && req.body.timestamp == null && req.body.sort_by == null && req.body.accepted == null && req.body.has_media == null) {
+        memcached.get("null", function (err, data) {
             if (err) console.log(err)
             if (data != null) {
-                console.log(req.body.sort_by+" cached!!!!")
-                d = data.slice(0, req.body.limit)
-                return res.json({ 'status': 'OK', 'questions': d })
-            } else {
+                console.log("cached!!!!")
+                d = data.slice(0,req.body.limit)
+                return res.json({'status':'OK','questions':d})
+            }else{
                 console.log("$$$$$need cached$$$$$")
-                db.collection('questions').find({}).limit(100).sort(sort_q).toArray(function (err, result) {
-                    if (err) console.log(err)
+                db.collection('questions').find({}).limit(100).sort({ "score": -1 }).toArray(function(err,result){
+                    if(err) console.log(err)
                     var questions = []
                     for (var i in result) {
                         var question = result[i]
@@ -58,14 +50,13 @@ app.post('/search', jsonParser, function (req, res) {
                         question['answer_count'] = answers.length
                         questions.push(question)
                     }
-                    memcached.add(req.body.sort_q, questions, 5, function (err) { if (err) console.log(err) })
-                    que = questions.slice(0, req.body.limit)
+                    memcached.add('null',questions,5,function(err){if(err)console.log(err)})
+                    que = questions.slice(0,req.body.limit)
                     res.json({ 'status': 'OK', 'questions': que })
                 })
             }
         })
     } else {
-        console.log("timestamps:" + req.body.timestamp + "\tlimit:" + req.body.limit + "\taccepted:" + req.body.accepted + "\tq:" + req.body.q + "\tmedia:" + req.body.has_media + "\tsort:" + req.body.sort_by)
         if (req.body.timestamp == null) {
             req.body.timestamp = Date.now() / 1000 | 0
         }
@@ -73,11 +64,11 @@ app.post('/search', jsonParser, function (req, res) {
         if (req.body.limit > 100) {
             req.body.limit = 100
         }
-
+        
         if (typeof req.body.accepted != "boolean") {
             req.body.accepted = false
         }
-
+        
         var query = { 'timestamp': { $lt: req.body.timestamp } }
 
         if (req.body.accepted) {

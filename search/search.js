@@ -15,8 +15,8 @@ app.get('/', function (req, res) {
 })
 
 app.post('/search', jsonParser, function (req, res) {
-    //console.log("nobody nobody but u <3")
-
+    var db = req.app.locals.db
+    //console.log("nobody nobody but u <3"
     //console.log("timestamps:" + req.body.timestamp + "\tlimit:" + req.body.limit + "\taccepted:" + req.body.accepted + "\tq:" + req.body.q + "\tmedia:" + req.body.has_media + "\tsort:" + req.body.sort_by)
     if (req.body.limit == null) {
         req.body.limit = 25
@@ -72,7 +72,7 @@ app.post('/search', jsonParser, function (req, res) {
         if (typeof req.body.accepted != "boolean") {
             req.body.accepted = false
         }
-        var db = req.app.locals.db
+        
         var query = { 'timestamp': { $lt: req.body.timestamp } }
 
         if (req.body.accepted) {

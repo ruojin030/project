@@ -60,11 +60,12 @@ app.post('/search', jsonParser, function (req, res) {
     }).then(function (resp) {
         var hits = resp.hits.hits;
         console.log("es found:" + hits.length);
-        var resultID = []
+        var questions = []
         for (var i in hits) {
-            resultID.push(hits[i]._id);
+            questions.push(hits[i]._id._source);
         }
-        db.collection('questions').find({ "id": { $in: resultID } }).toArray(function (err, result) {
+        res.json({'status':'OK','questions':questions})
+        /* db.collection('questions').find({ "id": { $in: resultID } }).toArray(function (err, result) {
             if (err) console.log("question found err:"+err);
             var questions = []
             console.log("mongodb found " + result.length)
@@ -91,7 +92,7 @@ app.post('/search', jsonParser, function (req, res) {
                          question.user = data   
                          questions.push(question)
                      }else{
-                         console.log("no cache :(") */
+                         console.log("no cache :(") 
                 db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                     if (err) console.log("db found error "+err)
                     if (result.length != 1) {
@@ -112,12 +113,12 @@ app.post('/search', jsonParser, function (req, res) {
                     })
                 })
             }
-        })    */
+        })    
                 })
                 questions.push(question)
             }           
             res.json({ 'status': 'OK', 'questions': questions })
-        })
+        }) */
     })
 });
 

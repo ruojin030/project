@@ -5,7 +5,7 @@ var Memcached = require('memcached');
 const MongoClient = require('mongodb').MongoClient;
 const mongo_address = 'mongodb://192.168.122.47:27017';
 var jsonParser = bodyParser.json()
-const esindex = "test"
+const esindex = "pro.questions"
 
 const port = 3001
 var elasticsearch = require('elasticsearch');
@@ -17,7 +17,6 @@ var memcached = new Memcached('localhost:11211');
 
 app.post('/search', jsonParser, function (req, res) {
     //console.log("nobody nobody but u <3")
-    var db = req.app.locals.db
     var must = []
     console.log("timestamps:" + req.body.timestamp + "\t limit:" + req.body.limit + "\t accepted:" + req.body.accepted + "\t q:" + req.body.q)
     if (req.body.timestamp == null) {

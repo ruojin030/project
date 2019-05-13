@@ -8,11 +8,7 @@ router.get('/',function(req,res){
     media_db.collection('medias').remove({})
     db.collection('answers').remove({},function(err,result){
         db.collection('questions').remove({},function(err,result){
-            db.collection('users').remove({},function (err, result){
-                db.collection('medias').remove({},function(err,result){
                     res.json({'status':'OK'})
-                })
-            })
         })
     })
     

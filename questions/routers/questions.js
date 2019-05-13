@@ -133,7 +133,7 @@ router.get('/:id', jsonParser, function (req, res) {
             delete question._id
             delete question.answers
             question['answer_count'] = answers.length
-            db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
+            media_db.collection('users').find({ 'username': question.user }).toArray(function (err, result) {
                 if (err) console.log(err)
                 if (result[0].reputation < 1) {
                     result[0].reputation = 1
@@ -433,13 +433,12 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
                 downvoters.push(req.cookies.session.current_user)
                 //console.log(req.params.id + "change upvote to downvote")
             }
-            var username = result[0].user
             //console.log(result[0].score)
             db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'upvoters': upvoters, 'downvoters': downvoters, 'score': result[0].score + changed } }, function (err, res) { //,{$inc:{'score':changed}}
                 if (err) console.log(err);
                 //console.log(req.params.id + " vote updated");
             });
-            db.collection('users').updateOne({ 'username': username }, { $inc: { 'reputation': changed } }, function (err, res) {
+            media_db.collection('users').updateOne({ 'username': result[0].user }, { $inc: { 'reputation': changed } }, function (err, res) {
                 if (err) console.log(err);
                 //console.log(username + " reputation updated " + changed)
             })

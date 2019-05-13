@@ -122,7 +122,7 @@ app.post('/search', jsonParser, function (req, res) {
     })
 });
 
-MongoClient.connect(mongo_address, (err, client) => {
+/* MongoClient.connect(mongo_address, (err, client) => {
     // ... start the server
     if (err) {
         console.log(err);
@@ -133,6 +133,6 @@ MongoClient.connect(mongo_address, (err, client) => {
     //console.log(db);
     app.locals.db = db;
 })
-
+ */
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 module.exports = app;

@@ -17,7 +17,7 @@ app.get('/', function (req, res) {
 app.post('/search', jsonParser, function (req, res) {
     //console.log("nobody nobody but u <3")
 
-    console.log("timestamps:" + req.body.timestamp + "\tlimit:" + req.body.limit + "\taccepted:" + req.body.accepted + "\tq:" + req.body.q + "\tmedia:" + req.body.has_media + "\tsort:" + req.body.sort_by)
+    //console.log("timestamps:" + req.body.timestamp + "\tlimit:" + req.body.limit + "\taccepted:" + req.body.accepted + "\tq:" + req.body.q + "\tmedia:" + req.body.has_media + "\tsort:" + req.body.sort_by)
     if (req.body.limit == null) {
         req.body.limit = 25
     }
@@ -25,8 +25,10 @@ app.post('/search', jsonParser, function (req, res) {
         memcached.get("null", function (err, data) {
             if (err) console.log(err)
             if (data != null) {
-                return data[0,req.body.limit]
+                console.log("cached!!!!")
+                return data.slice(0,req.body.limit)
             }else{
+                console.log("$$$$$need cached$$$$$")
                 db.collection('questions').find({}).limit(100).sort({ "score": -1 }).toArray(function(err,result){
                     if(err) console.log(err)
                     var questions = []
@@ -48,7 +50,8 @@ app.post('/search', jsonParser, function (req, res) {
                         questions.push(question)
                     }
                     memcached.add('null',questions,5,function(err){if(err)console.log(err)})
-                    res.json({ 'status': 'OK', 'questions': questions })
+                    que = questions.slice(0,req.body.limit)
+                    res.json({ 'status': 'OK', 'questions': que })
                 })
             }
         })

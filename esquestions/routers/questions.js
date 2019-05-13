@@ -20,75 +20,69 @@ router.post('/add', jsonParser, function (req, res) {
         console.log('user not login')
         return res.json({ 'status': 'error', 'error': 'user not login' })
     } else {
-            if (result.length != 1) {
-                console.log(req.cookies.session.current_user+' not in db')
+        if (req.body.title == null || req.body.body == null || req.body.tags == null) {
+            console.log("body miss part")
+            res.status(404)
+            return res.json({ 'status': 'error', 'error': 'wrong request type' })
+        }
+        var data = {}
+        var esdata = {}
+        if (req.body.media == null) {
+            req.body.media = []
+            data['has_media'] = false
+        } else {
+            data['has_media'] = true
+        }
+        var id1 = uniqid()
+        data['id'] = id1
+        data['user'] = req.cookies.session.current_user
+        data['title'] = req.body.title
+        data['body'] = req.body.body
+        data['score'] = 0
+        data['views'] = []
+        data['answers'] = []
+        data['timestamp'] = Date.now() / 1000
+        data['media'] = req.body.media
+        data['tags'] = req.body.tags
+        data['accepted_answer_id'] = null
+        data['upvoters'] = []
+        data['downvoters'] = []
+        db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
+            if (result == null && req.body.media.length != 0) {
                 res.status(404)
-                return res.json({ 'status': 'error', 'error': 'user not match' })
+                console.log("no media can be add")
+                return res.json({ 'status': 'error', 'error': 'media error' })
             } else {
-                if (req.body.title == null || req.body.body == null || req.body.tags == null) {
-                    console.log("body miss part")
-                    res.status(404)
-                    return res.json({ 'status': 'error', 'error': 'wrong request type' })
+                m = []
+                for (i in result) {
+                    m.push(result[i].id)
                 }
-                var data = {}
-                var esdata = {}
-                if (req.body.media == null) {
-                    req.body.media = []
-                    data['has_media'] = false
-                } else {
-                    data['has_media'] = true
-                }
-                var id1 = uniqid()
-                data['id'] = id1
-                data['user'] = req.cookies.session.current_user
-                data['title'] = req.body.title
-                data['body'] = req.body.body
-                data['score'] = 0
-                data['views'] = []
-                data['answers'] = []
-                data['timestamp'] = Date.now() / 1000
-                data['media'] = req.body.media
-                data['tags'] = req.body.tags
-                data['accepted_answer_id'] = null
-                data['upvoters'] = []
-                data['downvoters'] = []
-                db.collection("medias").find({ "poster": req.cookies.session.current_user, "used": false }).toArray(function (err, result) {
-                    if (result == null && req.body.media.length != 0) {
-                        res.status(404)
-                        console.log("no media can be add")
-                        return res.json({ 'status': 'error', 'error': 'media error' })
-                    } else {
-                        m = []
-                        for (i in result) {
-                            m.push(result[i].id)
-                        }
-                        correct = true
-                        for (i in req.body.media) {
-                            if (!m.includes(req.body.media[i])) {
-                                correct = false
-                                console.log("media "+req.body.media[i]+" been used")
-                            }
-                        }
-                        if (!correct) {
-                            res.status(404)
-                            return res.json({ 'status': 'error', 'error': 'media error' })
-                        } else {
-                            for (i in req.body.media) {
-                                db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
-                            }
-                            
-                            db.collection('questions').insertOne(data,function(err){
-                                var id1 = data.id
-                                delete data.id
-                                delete data._id
-                                es.index({index:esindex,body:data,id:id1})
-                            })
-                            console.log(data['id'] +" add success by "+ req.cookies.session.current_user)
-                            res.json({ 'status': "OK", 'id': data.id })
-                        }
+                correct = true
+                for (i in req.body.media) {
+                    if (!m.includes(req.body.media[i])) {
+                        correct = false
+                        console.log("media " + req.body.media[i] + " been used")
                     }
-                })
+                }
+                if (!correct) {
+                    res.status(404)
+                    return res.json({ 'status': 'error', 'error': 'media error' })
+                } else {
+                    for (i in req.body.media) {
+                        db.collection("medias").updateOne({ "id": req.body.media[i] }, { $set: { "used": true } })
+                    }
+
+                    db.collection('questions').insertOne(data, function (err) {
+                        var id1 = data.id
+                        delete data.id
+                        delete data._id
+                        es.index({ index: esindex, body: data, id: id1 })
+                    })
+                    console.log(data['id'] + " add success by " + req.cookies.session.current_user)
+                    res.json({ 'status': "OK", 'id': data.id })
+                }
             }
+        })
     }
 });
 
@@ -97,7 +91,7 @@ router.get('/:id', jsonParser, function (req, res) {
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(404)
-            console.log('cannot found question with id '+req.params.id)
+            console.log('cannot found question with id ' + req.params.id)
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }
         else {
@@ -112,7 +106,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 answers.push(question.answers[i])
             }
             if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) { //count by IP
-                console.log("not login use ip: " + req.headers['x-forwarded-for']+ " QID is "+ req.params.id)
+                console.log("not login use ip: " + req.headers['x-forwarded-for'] + " QID is " + req.params.id)
                 if (!views.includes(req.headers['x-forwarded-for'])) {
                     console.log("ip not included")
                     views.push(req.headers['x-forwarded-for'])
@@ -123,7 +117,7 @@ router.get('/:id', jsonParser, function (req, res) {
                 }
             }
             else {
-                console.log(req.cookies.session.current_user+" get question "+req.params.id)
+                console.log(req.cookies.session.current_user + " get question " + req.params.id)
                 //console.log(req.cookies.session.current_user + " getQuestion " + req.params.id)
                 if (!views.includes(req.cookies.session.current_user)) {
                     console.log(req.cookies.session.current_user + " not included, views " + views)
@@ -191,7 +185,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                 for (i in req.body.media) {
                     if (!m.includes(req.body.media[i])) {
                         correct = false
-                        console.log("cannot find media with id "+req.body.media[i])
+                        console.log("cannot find media with id " + req.body.media[i])
                     }
                 }
                 if (!correct) {
@@ -207,7 +201,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
                         if (result.length != 1) {
                             res.status(404)
-                            console.log("question "+req.params.id +"not found")
+                            console.log("question " + req.params.id + "not found")
                             return res.json({ 'status': 'error', 'error': 'question not found' })
                         }
                         else {
@@ -217,7 +211,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                                 answers.push(question.answers[i])
                             }
                             answers.push(id)*/
-                            db.collection('questions').updateOne({'id':req.params.id},{$push:{'answers':id}})
+                            db.collection('questions').updateOne({ 'id': req.params.id }, { $push: { 'answers': id } })
                             /*db.collection('questions').updateOne({ 'id': req.params.id }, { $set: { 'answers': answers } }, function (err, res) {
                                 if (err) throw err;
                                 //console.log("question:"+req.params.id+"add one answer");
@@ -225,7 +219,7 @@ router.post('/:id/answers/add', jsonParser, function (req, res) {
                             for (i = 0; i < req.body.media; i++) {
                                 db.collection("medias").updateOne({ "id": req.body.media[i] }, { "used": true })
                             }
-                            console.log("answer add success by "+ req.cookies.session.current_user+" to "+req.params.id)
+                            console.log("answer add success by " + req.cookies.session.current_user + " to " + req.params.id)
                             res.json({ 'status': 'OK', 'id': id })
                         }
                     })
@@ -239,7 +233,7 @@ router.get('/:id/answers', function (req, res) {
     db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, result) {
         if (err) console.log(err);
         else {
-            console.log("get answers of "+req.params.id)
+            console.log("get answers of " + req.params.id)
             return res.json({ 'status': 'OK', 'answers': result })
         }
     })
@@ -260,8 +254,8 @@ router.delete('/:id', jsonParser, function (req, res) {
     //console.log(req.cookies.session.current_user)
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
-            console.log(req.params.id+" not found")
-            return res.sendStatus(403)     
+            console.log(req.params.id + " not found")
+            return res.sendStatus(403)
         } else {
             var question = result[0]
             if (question.user != req.cookies.session.current_user) {
@@ -274,7 +268,7 @@ router.delete('/:id', jsonParser, function (req, res) {
                 db.collection('questions').deleteOne({ 'id': req.params.id }, function (err, obj) {
                     if (err) {
                         console.log("delete failded")
-                        res.sendStatus(403)                
+                        res.sendStatus(403)
                     }
                     db.collection('answers').find({ 'questionID': req.params.id }).toArray(function (err, r) {
                         if (r != null) {
@@ -288,21 +282,21 @@ router.delete('/:id', jsonParser, function (req, res) {
                                 db.collection('answers').deleteMany({ 'questionID': req.params.id })
                             }
                         }
-                        es.delete({index:esindex,id:req.params.id})
-                        console.log(req.params.id+" deleted success")
-                        request({  
+                        es.delete({ index: esindex, id: req.params.id })
+                        console.log(req.params.id + " deleted success")
+                        request({
                             url: 'http://192.168.122.35:3000/deletemedia',
                             method: 'POST',
-                            json:{'media':media}
-                        }, function(err,resp,body1){
-                            if(err) {
+                            json: { 'media': media }
+                        }, function (err, resp, body1) {
+                            if (err) {
                                 return res.sendStatus(404)
                             }
                             else {
-                                if(body1.status == 'error'){
+                                if (body1.status == 'error') {
                                     console.log('media delete error')
                                     return res.sendStatus(404)
-                                }else{
+                                } else {
                                     return res.sendStatus(200)
                                 }
                             }
@@ -327,7 +321,7 @@ router.post('/:id/upvote', jsonParser, function (req, res) {
     }
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
-            console.log(req.params.id+ " question not found")
+            console.log(req.params.id + " question not found")
             res.status(404)
             return res.json({ 'status': 'error', 'error': 'question not found' })
         }

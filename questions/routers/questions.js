@@ -88,6 +88,7 @@ router.post('/add', jsonParser, function (req, res) {
 
 router.get('/:id', jsonParser, function (req, res) {
     var db = req.app.locals.db
+    var media_db = req.app.locals.media_db
     db.collection('questions').find({ 'id': req.params.id }).toArray(function (err, result) {
         if (result.length != 1) {
             res.status(404)
@@ -374,6 +375,7 @@ router.delete('/:id', jsonParser, function (req, res) {
 
 router.post('/:id/upvote', jsonParser, function (req, res) {
     var db = req.app.locals.db
+    var media_db = req.app.locals.media_db
 
     if (req.cookies == undefined || req.cookies.session == undefined || req.cookies.session.current_user == undefined) {
         console.log("not login")

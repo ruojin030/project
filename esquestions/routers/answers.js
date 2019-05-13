@@ -1,7 +1,7 @@
-var express = require('../node_modules/express');
-var bodyParser = require('../node_modules/body-parser');
-var uniqid = require("../node_modules/uniqid");
-var cookieParser = require('../node_modules/cookie-parser');
+var express = require('express');
+var bodyParser = require('body-parser');
+var uniqid = require("uniqid");
+var cookieParser = require('cookie-parser');
 var router = express.Router();
 var jsonParser = bodyParser.json()
 

@@ -64,7 +64,12 @@ app.post('/search', jsonParser, function (req, res) {
         if (req.body.limit > 100) {
             req.body.limit = 100
         }
-        
+        sort_q = {}
+        if (req.body.sort_by == null || req.body.sort_by == "score") {
+            sort_q = { "score": -1 }
+        } else {
+            sort_q = { "timestamp": -1 }
+        }
         if (typeof req.body.accepted != "boolean") {
             req.body.accepted = false
         }

@@ -26,7 +26,8 @@ app.post('/search', jsonParser, function (req, res) {
             if (err) console.log(err)
             if (data != null) {
                 console.log("cached!!!!")
-                return data.slice(0,req.body.limit)
+                d = data.slice(0,req.body.limit)
+                return res.json({'status':'OK','questions':d})
             }else{
                 console.log("$$$$$need cached$$$$$")
                 db.collection('questions').find({}).limit(100).sort({ "score": -1 }).toArray(function(err,result){

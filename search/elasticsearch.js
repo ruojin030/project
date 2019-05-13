@@ -82,7 +82,7 @@ app.post('/search', jsonParser, function (req, res) {
     if (req.body.tags != null) {
         must.push({ match: { tags: { query: req.body.tags.join(' '), "operator": "and" } } })
     }
-    bool['must'] = must
+    boo['must'] = must
     client.search({
         index: esindex,
         size: req.body.limit,

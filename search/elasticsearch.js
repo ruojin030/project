@@ -66,6 +66,7 @@ app.post('/search', jsonParser, function (req, res) {
     } else {
         must.push({ match_all: {} })
     }
+    console.log(req.body.q)
     sort_q = {}
     if (req.body.sort_by == null || req.body.sort_by == "score") {
         sort_q = "score:desc"
@@ -73,7 +74,7 @@ app.post('/search', jsonParser, function (req, res) {
         sort_q = "timestamp:desc"
     }
     if (req.body.accepted) {
-        must.push({ exist: { field: accepted_answer_id } })
+        must.push({ exist: { field: "accepted_answer_id" } })
     }
     if (req.body.has_media) {
         must.push({ match: { has_media: true } })

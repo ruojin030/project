@@ -17,7 +17,7 @@ app.get('/', function (req, res) {
 app.post('/search', jsonParser, function (req, res) {
     //console.log("nobody nobody but u <3")
 
-    console.log("timestamps:" + req.body.timestamp + "\tlimit:" + req.body.limit + "\taccepted:" + req.body.accepted + "\tq:" + req.body.q+"\tmedia:"+req.body.has_media)
+    console.log("timestamps:" + req.body.timestamp + "\tlimit:" + req.body.limit + "\taccepted:" + req.body.accepted + "\tq:" + req.body.q+"\tmedia:"+req.body.has_media+"\tsort:"+req.body.sort_by)
     if (req.body.timestamp == null) {
         req.body.timestamp = Date.now() / 1000 | 0
     }
